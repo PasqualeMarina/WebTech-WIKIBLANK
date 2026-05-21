@@ -9,7 +9,16 @@ export function HomePage() {
       <PageHeader title="Home" titleId="home-title" />
 
       <div className={styles.homeGrid}>
-        <NewGameTile />
+        <div className={styles.gameActions}>
+          <NewGameTile
+            title="NEW GAME"
+            subtitle="Choose category"
+            variant="category"
+          />
+          <NewGameTile 
+            title="QUICK GAME" 
+            subtitle="Casual category" />
+        </div>
         <CurrentGamesPanel />
       </div>
     </section>
