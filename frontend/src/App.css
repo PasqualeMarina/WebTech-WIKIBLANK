@@ -49,9 +49,12 @@
   border-radius: 8px;
   background: transparent;
   color: var(--muted-text);
+  display: flex;
+  align-items: center;
   font: 700 0.88rem/1 var(--sans);
   letter-spacing: 0;
   text-align: left;
+  text-decoration: none;
   padding: 0 16px;
   cursor: pointer;
   transition:
@@ -71,6 +74,16 @@
   border-color: rgba(27, 76, 148, 0.22);
   color: #fff;
   box-shadow: 0 12px 24px rgba(31, 83, 158, 0.2);
+}
+
+.nav-item.disabled {
+  cursor: default;
+  opacity: 0.62;
+}
+
+.nav-item.disabled:hover {
+  background: transparent;
+  color: var(--muted-text);
 }
 
 .nav-item:focus-visible,
@@ -164,7 +177,7 @@
   text-shadow: 0 3px 12px rgba(20, 48, 91, 0.3);
 }
 
-.current-games {
+.game-panel {
   min-height: 320px;
   border: 1px solid rgba(74, 132, 217, 0.18);
   border-radius: 8px;
@@ -176,6 +189,10 @@
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
+}
+
+.leaderboard-layout {
+  width: 100%;
 }
 
 .panel-heading {
@@ -327,6 +344,7 @@
 
   .nav-item {
     min-height: 44px;
+    justify-content: center;
     text-align: center;
     padding: 0 10px;
   }

@@ -1,29 +1,27 @@
 import { SidebarNavItem } from './SidebarNavItem'
-
-const sidebarItems = [
-  'HOME',
-  'CLASSIFICA',
-  'PARTITE CONCLUSE',
-  'IMPOSTAZIONI',
-]
+import { navigationItems, type NavigationItemId } from '../types/navigation'
 
 type SidebarProps = {
-  activeItem: string
+  activeItem: NavigationItemId
+  onSelect: (item: NavigationItemId) => void
 }
 
-export function Sidebar({ activeItem }: SidebarProps) {
+export function Sidebar({ activeItem, onSelect }: SidebarProps) {
   return (
-    <aside className="sidebar" aria-label="Navigazione principale">
+    <aside className="sidebar" aria-label="Main navigation">
       <div className="brand">
         <img src="/wikiBlankLOGO.png" alt="WikiBlank" />
       </div>
 
       <nav className="sidebar-nav">
-        {sidebarItems.map((item) => (
+        {navigationItems.map((item) => (
           <SidebarNavItem
-            key={item}
-            label={item}
-            isActive={item === activeItem}
+            key={item.id}
+            label={item.label}
+            path={item.path}
+            isActive={item.id === activeItem}
+            isEnabled={item.isEnabled}
+            onClick={() => onSelect(item.id)}
           />
         ))}
       </nav>
