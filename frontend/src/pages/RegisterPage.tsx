@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom'
 import styles from './LoginPage.module.css'
 
-export function LoginPage() {
+export function RegisterPage() {
   return (
-    <section className={styles.authPage} aria-labelledby="login-title">
+    <section className={styles.authPage} aria-labelledby="register-title">
       <form className={styles.authCard}>
         <div className={styles.cardHeading}>
           <p>WikiBlank</p>
-          <h1 id="login-title">Log in</h1>
+          <h1 id="register-title">Register</h1>
         </div>
 
         <div className={styles.fields}>
@@ -20,17 +20,22 @@ export function LoginPage() {
             <span>Password</span>
             <input type="password" placeholder="********" />
           </label>
+
+          <label className={styles.field}>
+            <span>Confirm password</span>
+            <input type="password" placeholder="********" />
+          </label>
         </div>
 
         <div className={styles.actions}>
           <button type="submit" className={styles.primaryAction}>
-            Log in
+            Register
           </button>
           <Link to="/home" className={styles.guestAction}>
             Continue as guest
           </Link>
-          <Link to="/register" className={styles.secondaryAction}>
-            Create account
+          <Link to="/login" className={styles.secondaryAction}>
+            Back to login
           </Link>
         </div>
       </form>

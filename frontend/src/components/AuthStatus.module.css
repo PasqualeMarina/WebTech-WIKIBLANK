@@ -1,4 +1,5 @@
 .loginButton,
+.registerButton,
 .logoutButton {
   min-height: 42px;
   border: 1px solid rgba(74, 132, 217, 0.22);
@@ -22,14 +23,37 @@
     transform 0.18s ease;
 }
 
+.authActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.registerButton {
+  border-color: rgba(27, 76, 148, 0.22);
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.24), transparent 42%),
+    linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(31, 83, 158, 0.2);
+}
+
 .loginButton:hover,
+.registerButton:hover,
 .logoutButton:hover {
   border-color: rgba(74, 132, 217, 0.38);
   background: rgba(74, 132, 217, 0.09);
   transform: translateY(-1px);
 }
 
+.registerButton:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.24), transparent 42%),
+    linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
+}
+
 .loginButton:focus-visible,
+.registerButton:focus-visible,
 .logoutButton:focus-visible {
   outline: 3px solid rgba(255, 210, 94, 0.85);
   outline-offset: 3px;
@@ -54,7 +78,14 @@
 }
 
 @media (max-width: 520px) {
+  .authActions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
   .loginButton,
+  .registerButton,
   .logoutButton {
     width: 100%;
   }

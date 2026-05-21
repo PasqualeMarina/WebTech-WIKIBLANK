@@ -14,9 +14,14 @@ export function AuthStatus() {
 
   if (!currentUser) {
     return (
-      <Link to="/login" className={styles.loginButton}>
-        Log in
-      </Link>
+      <div className={styles.authActions}>
+        <Link to="/login" className={styles.loginButton}>
+          Log in
+        </Link>
+        <Link to="/register" className={styles.registerButton}>
+          Register
+        </Link>
+      </div>
     )
   }
 
