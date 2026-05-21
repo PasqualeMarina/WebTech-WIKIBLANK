@@ -1,0 +1,121 @@
+.tryPanel {
+  border: 1px solid rgba(74, 132, 217, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.24), transparent 46%),
+    linear-gradient(315deg, rgba(74, 132, 217, 0.12), transparent 44%),
+    rgba(255, 255, 255, 0.68);
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field span,
+.summaryItem span {
+  color: var(--muted-text);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.field input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(74, 132, 217, 0.22);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font: 700 0.95rem/1 var(--sans);
+  letter-spacing: 0;
+  padding: 0 14px;
+}
+
+.field input:focus {
+  outline: none;
+}
+
+.field input:focus-visible {
+  outline: 3px solid rgba(255, 210, 94, 0.85);
+  outline-offset: 2px;
+}
+
+.primaryAction,
+.secondaryAction,
+.abandonAction {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: 900 0.78rem/1 var(--sans);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.primaryAction {
+  border: 1px solid rgba(27, 76, 148, 0.22);
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(31, 83, 158, 0.2);
+}
+
+.secondaryAction,
+.abandonAction {
+  border: 1px solid rgba(74, 132, 217, 0.22);
+  background: #fff;
+  color: var(--brand-blue-dark);
+}
+
+.abandonAction {
+  color: #8a2b3b;
+}
+
+.primaryAction:hover,
+.secondaryAction:hover,
+.abandonAction:hover {
+  transform: translateY(-1px);
+}
+
+.secondaryAction:hover,
+.abandonAction:hover {
+  background: rgba(74, 132, 217, 0.09);
+}
+
+.primaryAction:focus-visible,
+.secondaryAction:focus-visible,
+.abandonAction:focus-visible {
+  outline: 3px solid rgba(255, 210, 94, 0.85);
+  outline-offset: 3px;
+}
+
+.summaryGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.summaryItem {
+  border: 1px solid rgba(74, 132, 217, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.22), transparent 42%),
+    rgba(255, 255, 255, 0.84);
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.summaryItem strong {
+  color: var(--brand-blue-dark);
+  font-size: 1.15rem;
+  line-height: 1;
+}
