@@ -1,6 +1,6 @@
-import { CurrentGamesPanel } from './CurrentGamesPanel'
-import { NewGameTile } from './NewGameTile'
-import { PageHeader } from './PageHeader'
+import { CurrentGamesPanel } from '../components/CurrentGamesPanel'
+import { NewGameTile } from '../components/NewGameTile'
+import { PageHeader } from '../components/PageHeader'
 import styles from './HomePage.module.css'
 
 export function HomePage() {

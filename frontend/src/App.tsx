@@ -1,20 +1,18 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import './App.css'
-import { HomePage } from './components/HomePage'
-import { LeaderboardPage } from './components/LeaderboardPage'
-import { Sidebar } from './components/Sidebar'
+import { AppLayout } from './layout/AppLayout'
+import { HomePage } from './pages/HomePage'
+import { LeaderboardPage } from './pages/LeaderboardPage'
 
 function App() {
   return (
-    <main className="app-shell">
-      <Sidebar />
-      <Routes>
+    <Routes>
+      <Route element={<AppLayout />}>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
-      </Routes>
-    </main>
+      </Route>
+    </Routes>
   )
 }
 

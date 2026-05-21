@@ -1,5 +1,5 @@
-import { GameTablePanel } from './GameTablePanel'
-import { PageHeader } from './PageHeader'
+import { GameTablePanel } from '../components/GameTablePanel'
+import { PageHeader } from '../components/PageHeader'
 import styles from './LeaderboardPage.module.css'
 
 const leaderboardColumns = [

@@ -1,4 +1,4 @@
-.app-shell {
+.appShell {
   min-height: 100svh;
   display: grid;
   grid-template-columns: 304px minmax(0, 1fr);
@@ -10,7 +10,7 @@
 }
 
 @media (max-width: 820px) {
-  .app-shell {
+  .appShell {
     grid-template-columns: 1fr;
   }
 }
