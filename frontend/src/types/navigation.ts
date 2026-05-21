@@ -37,18 +37,3 @@ export const navigationItems: NavigationItem[] = [
     isEnabled: false,
   },
 ]
-
-export function getNavigationItemFromPath(pathname: string): NavigationItemId {
-  const matchingItem = navigationItems.find(
-    (item) => item.path === pathname && item.isEnabled,
-  )
-
-  return matchingItem?.id ?? 'home'
-}
-
-export function getNavigationPath(itemId: NavigationItemId) {
-  return (
-    navigationItems.find((item) => item.id === itemId && item.isEnabled)?.path ??
-    '/home'
-  )
-}

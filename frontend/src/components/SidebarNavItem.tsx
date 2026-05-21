@@ -1,35 +1,23 @@
+import { NavLink } from 'react-router-dom'
 import styles from './SidebarNavItem.module.css'
 
 type SidebarNavItemProps = {
   label: string
   path: string
-  isActive: boolean
   isEnabled: boolean
-  onClick: () => void
 }
 
 export function SidebarNavItem({
   label,
   path,
-  isActive,
   isEnabled,
-  onClick,
 }: SidebarNavItemProps) {
-  const className = [
-    styles.navItem,
-    isActive ? styles.active : '',
-    !isEnabled ? styles.disabled : '',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   if (!isEnabled) {
     return (
       <button
         type="button"
-        className={className}
+        className={[styles.navItem, styles.disabled].join(' ')}
         aria-disabled="true"
-        onClick={onClick}
       >
         {label}
       </button>
@@ -37,16 +25,15 @@ export function SidebarNavItem({
   }
 
   return (
-    <a
-      href={path}
-      className={className}
-      aria-current={isActive ? 'page' : undefined}
-      onClick={(event) => {
-        event.preventDefault()
-        onClick()
-      }}
+    <NavLink
+      to={path}
+      className={({ isActive }) =>
+        [styles.navItem, isActive ? styles.active : '']
+          .filter(Boolean)
+          .join(' ')
+      }
     >
       {label}
-    </a>
+    </NavLink>
   )
 }
