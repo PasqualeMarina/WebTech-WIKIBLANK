@@ -28,7 +28,7 @@ export const navigationItems: NavigationItem[] = [
     id: 'completed-games',
     label: 'COMPLETED GAMES',
     path: '/completed-games',
-    isEnabled: false,
+    isEnabled: true,
   },
   {
     id: 'settings',
