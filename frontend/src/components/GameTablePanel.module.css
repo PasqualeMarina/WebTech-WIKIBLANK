@@ -14,10 +14,11 @@
 
 .panelHeading {
   padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(74, 132, 217, 0.16);
+  border-bottom: 1px solid rgba(74, 132, 217, 0.2);
   background:
-    linear-gradient(135deg, rgba(255, 215, 108, 0.45), transparent 48%),
-    linear-gradient(145deg, rgba(74, 132, 217, 0.18), rgba(255, 255, 255, 0.3));
+    linear-gradient(135deg, rgba(74, 132, 217, 0.16), transparent 46%),
+    linear-gradient(315deg, rgba(255, 215, 108, 0.18), transparent 42%),
+    rgba(255, 255, 255, 0.72);
 }
 
 .panelHeading h2 {
