@@ -18,15 +18,16 @@
 }
 
 .brand {
-  min-height: 132px;
+  min-height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 18px 18px;
+  padding: 10px 6px 18px;
 }
 
 .brand img {
-  width: min(178px, 100%);
+  width: 220px;
+  max-width: 100%;
   height: auto;
   display: block;
   filter: drop-shadow(0 10px 18px rgba(44, 91, 158, 0.14));
@@ -53,7 +54,7 @@
   }
 
   .brand img {
-    width: 148px;
+    width: 178px;
   }
 
   .sidebarNav {
