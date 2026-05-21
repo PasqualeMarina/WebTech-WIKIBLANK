@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import styles from './AuthStatus.module.css'
 
 type AuthUser = {
@@ -13,9 +14,9 @@ export function AuthStatus() {
 
   if (!currentUser) {
     return (
-      <button type="button" className={styles.loginButton}>
+      <Link to="/login" className={styles.loginButton}>
         Log in
-      </button>
+      </Link>
     )
   }
 

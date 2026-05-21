@@ -8,8 +8,12 @@
   color: var(--brand-blue-dark);
   box-shadow: 0 10px 22px rgba(44, 91, 158, 0.12);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font: 800 0.82rem/1 var(--sans);
   letter-spacing: 0;
+  text-decoration: none;
   text-transform: uppercase;
   transition:
     background 0.18s ease,
