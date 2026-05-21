@@ -1,0 +1,135 @@
+.gamePanel {
+  min-height: 320px;
+  border: 1px solid rgba(74, 132, 217, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.2), transparent 34%),
+    linear-gradient(315deg, rgba(74, 132, 217, 0.16), transparent 38%),
+    rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 40px rgba(44, 91, 158, 0.16);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+
+.panelHeading {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(74, 132, 217, 0.16);
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.45), transparent 48%),
+    linear-gradient(145deg, rgba(74, 132, 217, 0.18), rgba(255, 255, 255, 0.3));
+}
+
+.panelHeading h2 {
+  margin: 0;
+  color: var(--brand-blue-dark);
+  font-size: 1.2rem;
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.gamesTableWrap {
+  padding: 18px;
+  overflow-x: auto;
+}
+
+.gamesTable {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  background: transparent;
+}
+
+.gamesTable th,
+.gamesTable td {
+  text-align: left;
+}
+
+.gamesTable th {
+  padding: 0 14px 2px;
+  color: var(--brand-blue-dark);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.gamesTable th::after {
+  content: '';
+  display: block;
+  width: 34px;
+  height: 4px;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand-yellow), var(--brand-blue));
+}
+
+.gamesTable td {
+  padding: 18px 16px;
+  color: var(--brand-blue-dark);
+  font-size: 0.95rem;
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.22), transparent 42%),
+    rgba(255, 255, 255, 0.84);
+  border-top: 1px solid rgba(74, 132, 217, 0.16);
+  border-bottom: 1px solid rgba(74, 132, 217, 0.16);
+}
+
+.gamesTable td:first-child {
+  border-left: 1px solid rgba(74, 132, 217, 0.16);
+  border-radius: 8px 0 0 8px;
+}
+
+.gamesTable td:last-child {
+  border-right: 1px solid rgba(74, 132, 217, 0.16);
+  border-radius: 0 8px 8px 0;
+}
+
+.gamesTable .emptyTableCell {
+  height: 168px;
+  color: var(--brand-blue-dark);
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.28), transparent 46%),
+    linear-gradient(315deg, rgba(74, 132, 217, 0.16), transparent 44%),
+    rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(74, 132, 217, 0.18);
+  border-radius: 8px;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.emptyGameState {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+
+.emptyGameState > span {
+  font-size: 1.05rem;
+}
+
+.emptyGameLines {
+  width: min(320px, 100%);
+  display: grid;
+  gap: 10px;
+}
+
+.emptyGameLines span {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand-blue), var(--brand-yellow));
+  opacity: 0.72;
+}
+
+.emptyGameLines span:nth-child(2) {
+  width: 78%;
+  justify-self: center;
+}
+
+.emptyGameLines span:nth-child(3) {
+  width: 54%;
+  justify-self: center;
+}

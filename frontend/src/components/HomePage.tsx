@@ -1,15 +1,14 @@
 import { CurrentGamesPanel } from './CurrentGamesPanel'
 import { NewGameTile } from './NewGameTile'
+import { PageHeader } from './PageHeader'
+import styles from './HomePage.module.css'
 
 export function HomePage() {
   return (
-    <section className="home-page" aria-labelledby="home-title">
-      <header className="home-header">
-        <p className="eyebrow">WikiBlank</p>
-        <h1 id="home-title">Home</h1>
-      </header>
+    <section className={styles.homePage} aria-labelledby="home-title">
+      <PageHeader title="Home" titleId="home-title" />
 
-      <div className="home-grid">
+      <div className={styles.homeGrid}>
         <NewGameTile />
         <CurrentGamesPanel />
       </div>

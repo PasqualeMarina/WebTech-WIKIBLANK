@@ -1,4 +1,6 @@
 import { GameTablePanel } from './GameTablePanel'
+import { PageHeader } from './PageHeader'
+import styles from './LeaderboardPage.module.css'
 
 const leaderboardColumns = [
   'Player',
@@ -8,13 +10,10 @@ const leaderboardColumns = [
 
 export function LeaderboardPage() {
   return (
-    <section className="home-page leaderboard-page" aria-labelledby="leaderboard-title">
-      <header className="home-header">
-        <p className="eyebrow">WikiBlank</p>
-        <h1 id="leaderboard-title">Leaderboard</h1>
-      </header>
+    <section className={styles.leaderboardPage} aria-labelledby="leaderboard-title">
+      <PageHeader title="Leaderboard" titleId="leaderboard-title" />
 
-      <div className="leaderboard-layout">
+      <div className={styles.leaderboardLayout}>
         <GameTablePanel
           title="Top players"
           titleId="leaderboard-panel-title"

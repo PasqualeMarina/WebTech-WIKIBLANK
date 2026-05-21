@@ -1,3 +1,5 @@
+import styles from './SidebarNavItem.module.css'
+
 type SidebarNavItemProps = {
   label: string
   path: string
@@ -13,11 +15,19 @@ export function SidebarNavItem({
   isEnabled,
   onClick,
 }: SidebarNavItemProps) {
+  const className = [
+    styles.navItem,
+    isActive ? styles.active : '',
+    !isEnabled ? styles.disabled : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   if (!isEnabled) {
     return (
       <button
         type="button"
-        className="nav-item disabled"
+        className={className}
         aria-disabled="true"
         onClick={onClick}
       >
@@ -29,7 +39,7 @@ export function SidebarNavItem({
   return (
     <a
       href={path}
-      className={isActive ? 'nav-item active' : 'nav-item'}
+      className={className}
       aria-current={isActive ? 'page' : undefined}
       onClick={(event) => {
         event.preventDefault()
