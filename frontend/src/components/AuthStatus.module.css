@@ -23,6 +23,15 @@
     transform 0.18s ease;
 }
 
+.loginButton {
+  border-color: rgba(255, 215, 108, 0.55);
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.62), transparent 46%),
+    linear-gradient(315deg, rgba(74, 132, 217, 0.1), transparent 44%),
+    rgba(255, 255, 255, 0.9);
+  color: var(--brand-blue-dark);
+}
+
 .authActions {
   display: flex;
   align-items: center;
@@ -44,6 +53,14 @@
   border-color: rgba(74, 132, 217, 0.38);
   background: rgba(74, 132, 217, 0.09);
   transform: translateY(-1px);
+}
+
+.loginButton:hover {
+  border-color: rgba(255, 215, 108, 0.72);
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.72), transparent 46%),
+    linear-gradient(315deg, rgba(74, 132, 217, 0.14), transparent 44%),
+    rgba(255, 255, 255, 0.94);
 }
 
 .registerButton:hover {
