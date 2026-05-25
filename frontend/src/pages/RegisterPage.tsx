@@ -35,7 +35,7 @@ export function RegisterPage() {
             Continue as guest
           </Link>
           <Link to="/login" className={styles.secondaryAction}>
-            Back to login
+            LOGIN
           </Link>
         </div>
       </form>
