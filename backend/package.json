@@ -1,16 +1,25 @@
 {
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "db:init": "tsx src/db/init-db.ts",
     "build": "tsc",
+    "lint": "eslint .",
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "better-sqlite3": "^12.10.0",
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.1",
+    "eslint": "^10.3.0",
+    "globals": "^17.6.0",
     "tsx": "^4.22.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.2"
   }
 }
