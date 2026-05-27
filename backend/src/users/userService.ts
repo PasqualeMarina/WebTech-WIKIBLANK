@@ -1,6 +1,6 @@
 import { hashPassword, verifyPassword } from '../auth/passwordService.js';
 import { InvalidCredentialsError, UserAlreadyExistsError } from './userErrors.js';
-import { createUser, findUserByUsername } from './userRepository.js';
+import { createUser, findAuthUserById, findUserByUsername } from './userRepository.js';
 import type { AuthUser, RegisterRequest, User } from './userTypes.js';
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -41,4 +41,8 @@ export function loginUser(username: string, password: string): AuthUser {
         id: user.id,
         username: user.username,
     };
+}
+
+export function getAuthenticatedUser(userId: number): AuthUser | null {
+    return findAuthUserById(userId);
 }

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { InvalidCredentialsError, UserAlreadyExistsError } from './userErrors.js';
-import { loginUser, registerUser } from './userService.js';
+import { getAuthenticatedUser, loginUser, registerUser } from './userService.js';
 import { isValidLoginRequest, isValidRegisterRequest } from './userValidators.js';
 
 export const userRouter = Router();
@@ -36,6 +36,7 @@ userRouter.post('/login', (req, res) => {
 
   try {
     const user = loginUser(loginData.username, loginData.password);
+    req.session.userId = user.id;
     res.json({ message: 'User logged in successfully', user });
   } catch (error) {
     if (error instanceof InvalidCredentialsError) {
@@ -45,4 +46,20 @@ userRouter.post('/login', (req, res) => {
 
     res.status(500).json({ message: 'Internal server error' });
   }
+});
+
+userRouter.get('/me', (req, res) => {
+  if (req.session.userId === undefined) {
+    res.status(401).json({ message: 'Unauthorized' });
+    return;
+  }
+
+  const user = getAuthenticatedUser(req.session.userId);
+
+  if (!user) {
+    res.status(401).json({ message: 'Unauthorized' });
+    return;
+  }
+
+  res.json({ user });
 });

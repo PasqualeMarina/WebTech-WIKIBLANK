@@ -13,10 +13,20 @@ const findUserByUsernameStatement = db.prepare<[string], User>(`
   WHERE username = ?
 `);
 
+const findAuthUserByIdStatement = db.prepare<[number], AuthUser>(`
+  SELECT id, username
+  FROM users
+  WHERE id = ?
+`);
+
 export function findUserByUsername(username: string): User | null {
     return findUserByUsernameStatement.get(username) ?? null;
 }
 
 export function createUser(username: string, passwordHash: string): AuthUser | null{
     return createUserStatement.get(username, passwordHash) ?? null;
+}
+
+export function findAuthUserById(id: number): AuthUser | null {
+    return findAuthUserByIdStatement.get(id) ?? null;
 }
