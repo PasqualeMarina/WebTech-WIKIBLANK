@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { UserAlreadyExistsError } from './userErrors.js';
-import { registerUser } from './userService.js';
-import { isRegisterRequest } from './userValidators.js';
+import { InvalidCredentialsError, UserAlreadyExistsError } from './userErrors.js';
+import { loginUser, registerUser } from './userService.js';
+import { isValidLoginRequest, isValidRegisterRequest } from './userValidators.js';
 
 export const userRouter = Router();
 
 userRouter.post('/register', (req, res) => {
-  if (!isRegisterRequest(req.body)) {
+  if (!isValidRegisterRequest(req.body)) {
     res.status(400).json({ message: 'Invalid registration data' });
     return;
   }
@@ -27,6 +27,22 @@ userRouter.post('/register', (req, res) => {
 });
 
 userRouter.post('/login', (req, res) => {
-  // TODO: implement login logic
-  res.json({ message: 'User logged in successfully' });
+  if (!isValidLoginRequest(req.body)) {
+    res.status(400).json({ message: 'Invalid login data' });
+    return;
+  }
+
+  const loginData = req.body;
+
+  try {
+    const user = loginUser(loginData.username, loginData.password);
+    res.json({ message: 'User logged in successfully', user });
+  } catch (error) {
+    if (error instanceof InvalidCredentialsError) {
+      res.status(401).json({ message: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });

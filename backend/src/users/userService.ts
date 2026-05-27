@@ -1,7 +1,7 @@
-import { hashPassword } from '../auth/passwordService.js';
-import { UserAlreadyExistsError } from './userErrors.js';
-import { createUser } from './userRepository.js';
-import type { AuthUser, RegisterRequest } from './userTypes.js';
+import { hashPassword, verifyPassword } from '../auth/passwordService.js';
+import { InvalidCredentialsError, UserAlreadyExistsError } from './userErrors.js';
+import { createUser, findUserByUsername } from './userRepository.js';
+import type { AuthUser, RegisterRequest, User } from './userTypes.js';
 
 function isUniqueConstraintError(error: unknown): boolean {
     return (
@@ -28,4 +28,17 @@ export function registerUser(registerData: RegisterRequest): AuthUser {
 
         throw new Error('Failed to register user', { cause: error });
     }
+}
+
+export function loginUser(username: string, password: string): AuthUser {
+    const user: User | null = findUserByUsername(username);
+
+    if (!user || !verifyPassword(password, user.password_hash)) {
+        throw new InvalidCredentialsError();
+    }
+
+    return {
+        id: user.id,
+        username: user.username,
+    };
 }
