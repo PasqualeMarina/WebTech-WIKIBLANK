@@ -63,3 +63,15 @@ userRouter.get('/me', (req, res) => {
 
   res.json({ user });
 });
+
+userRouter.post('/logout', (req, res) => {
+  req.session.destroy((error) => {
+    if (error) {
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+
+    res.clearCookie('wikblank.sid');
+    res.json({ message: 'User logged out successfully' });
+  });
+});
