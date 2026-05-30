@@ -61,6 +61,18 @@
   gap: 14px;
 }
 
+.errorMessage {
+  margin: 0;
+  border: 1px solid rgba(199, 56, 56, 0.24);
+  border-radius: 8px;
+  background: rgba(199, 56, 56, 0.08);
+  color: #8f2323;
+  font-size: 0.88rem;
+  font-weight: 750;
+  line-height: 1.35;
+  padding: 12px 14px;
+}
+
 .actions {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -132,6 +144,12 @@
     linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
   color: #fff;
   box-shadow: 0 12px 24px rgba(31, 83, 158, 0.2);
+}
+
+.primaryAction:disabled {
+  cursor: wait;
+  opacity: 0.7;
+  transform: none;
 }
 
 .guestAction {

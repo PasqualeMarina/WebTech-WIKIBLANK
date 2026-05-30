@@ -14,8 +14,9 @@ function isUniqueConstraintError(error: unknown): boolean {
 
 export function registerUser(registerData: RegisterRequest): AuthUser {
     try{
+        const username = registerData.username.trim();
         const passwordHash = hashPassword(registerData.password);
-        const user = createUser(registerData.username, passwordHash);
+        const user = createUser(username, passwordHash);
         if (!user) {
             throw new Error('Failed to register user');
         }
@@ -31,7 +32,7 @@ export function registerUser(registerData: RegisterRequest): AuthUser {
 }
 
 export function loginUser(username: string, password: string): AuthUser {
-    const user: User | null = findUserByUsername(username);
+    const user: User | null = findUserByUsername(username.trim());
 
     if (!user || !verifyPassword(password, user.password_hash)) {
         throw new InvalidCredentialsError();

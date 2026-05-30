@@ -85,10 +85,19 @@
 
 .userName {
   min-width: 0;
+  min-height: 42px;
+  border: 1px solid rgba(74, 132, 217, 0.22);
+  border-radius: 8px;
+  padding: 0 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 215, 108, 0.22), transparent 42%),
+    rgba(255, 255, 255, 0.9);
   color: var(--brand-blue-dark);
-  font-size: 0.92rem;
-  font-weight: 800;
-  line-height: 1.2;
+  box-shadow: 0 10px 22px rgba(44, 91, 158, 0.12);
+  display: inline-flex;
+  align-items: center;
+  font: 800 0.82rem/1 var(--sans);
+  letter-spacing: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -103,7 +112,8 @@
 
   .loginButton,
   .registerButton,
-  .logoutButton {
+  .logoutButton,
+  .userName {
     width: 100%;
   }
 

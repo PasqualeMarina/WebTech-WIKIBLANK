@@ -1,6 +1,8 @@
 import express from 'express';
+import type { ErrorRequestHandler } from 'express';
 import session from 'express-session';
 import { userRouter } from './users/userRouter.js';
+import cors from 'cors';
 
 export const app = express();
 
@@ -11,7 +13,15 @@ if (isProduction && !process.env.SESSION_SECRET) {
   throw new Error('SESSION_SECRET must be set in production');
 }
 
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
+
 app.use(
   session({
     name: 'wikblank.sid',
@@ -27,3 +37,14 @@ app.use(
   }),
 );
 app.use('/api/users', userRouter);
+
+const jsonParseErrorHandler: ErrorRequestHandler = (error, _req, res, next) => {
+  if (error instanceof SyntaxError && 'body' in error) {
+    res.status(400).json({ message: 'Invalid JSON body' });
+    return;
+  }
+
+  next(error);
+};
+
+app.use(jsonParseErrorHandler);
