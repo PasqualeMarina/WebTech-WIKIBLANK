@@ -1,21 +1,40 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getApiErrorMessage } from '../api/client'
-import { loginUser } from '../api/users'
 import {
   MIN_PASSWORD_LENGTH,
   MIN_USERNAME_LENGTH,
 } from '../constants/authValidation'
+import { useAuth } from '../context/authContext'
 import styles from './LoginPage.module.css'
+
+function getLoginReasonMessage(reason: string | null): string | null {
+  if (reason === 'start-game') {
+    return 'Log in to start a new game.'
+  }
+
+  return null
+}
+
+function getSafeRedirectPath(redirectPath: string | null): string {
+  if (redirectPath?.startsWith('/') === true) {
+    return redirectPath
+  }
+
+  return '/home'
+}
 
 export function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { login } = useAuth()
   const [username, setUsername] = useState(
     () => searchParams.get('username') ?? '',
   )
   const [password, setPassword] = useState('')
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(() =>
+    getLoginReasonMessage(searchParams.get('reason')),
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -42,8 +61,8 @@ export function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      await loginUser({ username: trimmedUsername, password })
-      navigate('/home')
+      await login({ username: trimmedUsername, password })
+      navigate(getSafeRedirectPath(searchParams.get('redirect')))
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, 'Login failed'))
     } finally {

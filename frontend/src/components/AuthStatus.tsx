@@ -1,41 +1,12 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getCurrentUser, logoutUser } from '../api/users'
-import type { AuthUser } from '../types/user'
+import { useAuth } from '../context/authContext'
 import styles from './AuthStatus.module.css'
 
 export function AuthStatus() {
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let isMounted = true
-
-    getCurrentUser()
-      .then(({ user }) => {
-        if (isMounted) {
-          setCurrentUser(user)
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setCurrentUser(null)
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
+  const { currentUser, isLoading, logout } = useAuth()
 
   async function handleLogout() {
-    await logoutUser()
-    setCurrentUser(null)
+    await logout()
   }
 
   if (isLoading) {
