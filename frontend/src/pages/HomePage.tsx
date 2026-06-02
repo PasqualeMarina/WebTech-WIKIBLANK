@@ -4,7 +4,7 @@ import { CurrentGamesPanel } from '../components/CurrentGamesPanel'
 import { GameCategoryDialog } from '../components/GameCategoryDialog'
 import { NewGameTile } from '../components/NewGameTile'
 import { PageHeader } from '../components/PageHeader'
-import { gameCategories } from '../constants/gameCategories'
+import { gameCategories } from '../../../shared/gameCategories'
 import { useAuth } from '../context/authContext'
 import styles from './HomePage.module.css'
 

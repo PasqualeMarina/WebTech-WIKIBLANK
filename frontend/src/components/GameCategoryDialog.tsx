@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { GameCategory } from '../constants/gameCategories'
+import type { GameCategory } from '../../../shared/gameCategories'
 import styles from './GameCategoryDialog.module.css'
 
 type GameCategoryDialogProps = {

@@ -5,7 +5,7 @@ import { registerUser } from '../api/users'
 import {
   MIN_PASSWORD_LENGTH,
   MIN_USERNAME_LENGTH,
-} from '../constants/authValidation'
+} from '../../../shared/authValidation'
 import styles from './LoginPage.module.css'
 
 export function RegisterPage() {

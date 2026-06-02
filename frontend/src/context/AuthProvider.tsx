@@ -3,9 +3,12 @@ import {
   getCurrentUser,
   loginUser,
   logoutUser,
-  type AuthResponse,
 } from '../api/users'
-import type { AuthUser, LoginRequest } from '../types/user'
+import type {
+  AuthResponse,
+  AuthUser,
+  LoginRequest,
+} from '../../../shared/users'
 import { AuthContext } from './authContext'
 
 type AuthProviderProps = {

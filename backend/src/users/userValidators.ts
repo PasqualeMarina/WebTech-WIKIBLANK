@@ -1,7 +1,8 @@
 import type { LoginRequest, RegisterRequest } from './userTypes.js';
-
-const MIN_USERNAME_LENGTH = 3;
-const MIN_PASSWORD_LENGTH = 8;
+import {
+  MIN_PASSWORD_LENGTH,
+  MIN_USERNAME_LENGTH,
+} from '../../../shared/authValidation.js';
 
 function isCredentialsRequest(body: unknown): body is LoginRequest {
   return (

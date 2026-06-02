@@ -2,6 +2,7 @@ import express from 'express';
 import type { ErrorRequestHandler } from 'express';
 import session from 'express-session';
 import { userRouter } from './users/userRouter.js';
+import { gameRouter } from './games/gameRouter.js';
 import cors from 'cors';
 
 export const app = express();
@@ -48,3 +49,5 @@ const jsonParseErrorHandler: ErrorRequestHandler = (error, _req, res, next) => {
 };
 
 app.use(jsonParseErrorHandler);
+
+app.use('/api/games', gameRouter);

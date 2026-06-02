@@ -1,13 +1,15 @@
-import type { Article } from './article'
-import type { User } from './user'
+import type { Article } from './articles.js'
+import type { AuthUser } from './users.js'
 
-export type GameStatus = 'active' | 'won' | 'abandoned'
+export const GAME_STATUSES = ['active', 'won', 'abandoned'] as const
+
+export type GameStatus = (typeof GAME_STATUSES)[number]
 
 export type GameDetail = {
   id: number
   status: GameStatus
   article: Article
-  player: User
+  player: AuthUser
   currentTitleGuess: string | null
   revealedWordsCount: number
   wordGuessesCount: number
@@ -18,7 +20,7 @@ export type GameDetail = {
 }
 
 export type StartGameRequest = {
-  categoryId?: number
+  category?: string
 }
 
 export type WordGuessRequest = {
@@ -40,4 +42,8 @@ export type LeaderboardRow = {
   username: string
   completedGames: number
   averageTimeSeconds: number
+}
+
+export type GameResponse = {
+  game: GameDetail
 }

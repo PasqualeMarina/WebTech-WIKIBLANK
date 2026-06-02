@@ -5,7 +5,7 @@
     "db:init": "tsx src/db/init-db.ts",
     "build": "tsc",
     "lint": "eslint .",
-    "start": "node dist/server.js"
+    "start": "node dist/backend/src/server.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

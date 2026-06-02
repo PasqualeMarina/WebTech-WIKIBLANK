@@ -1,6 +1,9 @@
 import { createContext, useContext } from 'react'
-import type { AuthResponse } from '../api/users'
-import type { AuthUser, LoginRequest } from '../types/user'
+import type {
+  AuthResponse,
+  AuthUser,
+  LoginRequest,
+} from '../../../shared/users'
 
 export type AuthContextValue = {
   currentUser: AuthUser | null

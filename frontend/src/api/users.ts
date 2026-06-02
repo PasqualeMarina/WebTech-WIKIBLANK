@@ -1,18 +1,11 @@
 import { apiClient } from './client'
-import type { AuthUser, LoginRequest, RegisterRequest } from '../types/user'
-
-export type AuthResponse = {
-  message: string
-  user: AuthUser
-}
-
-export type CurrentUserResponse = {
-  user: AuthUser
-}
-
-export type LogoutResponse = {
-  message: string
-}
+import type {
+  AuthResponse,
+  CurrentUserResponse,
+  LoginRequest,
+  LogoutResponse,
+  RegisterRequest,
+} from '../../../shared/users'
 
 export async function registerUser(
   data: RegisterRequest,

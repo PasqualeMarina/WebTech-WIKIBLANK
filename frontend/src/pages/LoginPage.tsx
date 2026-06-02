@@ -4,7 +4,7 @@ import { getApiErrorMessage } from '../api/client'
 import {
   MIN_PASSWORD_LENGTH,
   MIN_USERNAME_LENGTH,
-} from '../constants/authValidation'
+} from '../../../shared/authValidation'
 import { useAuth } from '../context/authContext'
 import styles from './LoginPage.module.css'
 
