@@ -2,7 +2,6 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "db:init": "tsx src/db/init-db.ts",
     "build": "tsc",
     "lint": "eslint .",
     "start": "node dist/backend/src/server.js"
