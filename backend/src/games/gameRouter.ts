@@ -1,7 +1,7 @@
-import { router } from 'express';
+import { Router } from 'express';
 import { createGame } from './gameService.js';
 
-export const gameRouter = router();
+export const gameRouter = Router();
 
 gameRouter.post('/create', async (req, res) => {
     if (req.session.userId === undefined) {
