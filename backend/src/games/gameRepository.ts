@@ -1,4 +1,5 @@
 import { db } from '../db/database.js';
+import { GameStorageError } from './gameErrors.js';
 import type { CreatedGame, GameData } from './gameTypes.js';
 
 type CategoryRow = {
@@ -72,7 +73,7 @@ const createGameTransaction = db.transaction((gameData: GameData): CreatedGame =
     const category = findCategoryBySlugStatement.get(gameData.categoryId);
 
     if (!category) {
-        throw new Error(`Category "${gameData.categoryId}" not found`);
+        throw new GameStorageError(`Category "${gameData.categoryId}" not found in database`);
     }
 
     const existingArticle = findArticleBySourceUrlStatement.get(gameData.articleUrl);
@@ -97,7 +98,7 @@ const createGameTransaction = db.transaction((gameData: GameData): CreatedGame =
     }
 
     if (!articleId) {
-        throw new Error('Failed to create article');
+        throw new GameStorageError('Failed to create article');
     }
 
     const game = createGameStatement.get({
@@ -106,7 +107,7 @@ const createGameTransaction = db.transaction((gameData: GameData): CreatedGame =
     });
 
     if (!game) {
-        throw new Error('Failed to create game');
+        throw new GameStorageError('Failed to create game');
     }
 
     return game;
