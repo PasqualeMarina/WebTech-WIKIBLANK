@@ -7,32 +7,32 @@ export type GameCategory = {
 export const gameCategories: GameCategory[] = [
   {
     id: 'physics',
-    label: 'Fisica',
+    label: 'Physics',
     wikipediaCategory: 'Physics',
   },
   {
     id: 'history',
-    label: 'Storia',
+    label: 'History',
     wikipediaCategory: 'History',
   },
   {
     id: 'biology',
-    label: 'Biologia',
+    label: 'Biology',
     wikipediaCategory: 'Biology',
   },
   {
     id: 'cinema',
     label: 'Cinema',
-    wikipediaCategory: 'Cinema',
+    wikipediaCategory: 'Film',
   },
   {
     id: 'football',
-    label: 'Calcio',
+    label: 'Football',
     wikipediaCategory: 'Association football',
   },
   {
     id: 'geography',
-    label: 'Geografia',
+    label: 'Geography',
     wikipediaCategory: 'Geography',
   },
 ]
