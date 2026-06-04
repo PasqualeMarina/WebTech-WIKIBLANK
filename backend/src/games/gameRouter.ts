@@ -27,6 +27,24 @@ function sendCreateGameError(error: unknown, res: Response) {
     res.status(500).json({ message: 'Internal server error' });
 }
 
+function getRequestedCategory(body: unknown): string | null | undefined {
+    if (typeof body !== 'object' || body === null || !('category' in body)) {
+        return undefined;
+    }
+
+    const category = (body as { category?: unknown }).category;
+
+    if (category === undefined) {
+        return undefined;
+    }
+
+    if (typeof category !== 'string' || category.trim() === '') {
+        return null;
+    }
+
+    return category.trim();
+}
+
 gameRouter.post('/', async (req, res) => {
     if (req.session.userId === undefined) {
         res.status(401).json({ message: 'Unauthorized' });
@@ -34,9 +52,9 @@ gameRouter.post('/', async (req, res) => {
     }
 
     const userId = req.session.userId;
-    const category = req.body?.category;
+    const category = getRequestedCategory(req.body);
 
-    if (category !== undefined && (typeof category !== 'string' || category.trim() === '')) {
+    if (category === null) {
         res.status(400).json({ message: 'Invalid game category' });
         return;
     }
