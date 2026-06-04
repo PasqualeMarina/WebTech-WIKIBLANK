@@ -1,6 +1,6 @@
 import { db } from '../db/database.js';
 import { GameStorageError } from './gameErrors.js';
-import type { CreatedGame, GameData } from './gameTypes.js';
+import type { CreatedGame, GameData, GameDetailRow, RevealedWordRow } from './gameTypes.js';
 
 type CategoryRow = {
     id: number;
@@ -20,6 +20,37 @@ const findArticleBySourceUrlStatement = db.prepare<[string], ArticleRow>(`
     SELECT id
     FROM articles
     WHERE source_url = ?
+`);
+
+const findGameDetailByIdStatement = db.prepare<[number], GameDetailRow>(`
+    SELECT
+        games.id,
+        games.user_id,
+        games.article_id,
+        games.status,
+        games.current_title_guess,
+        games.revealed_words_count,
+        games.word_guesses_count,
+        games.title_guesses_count,
+        games.started_at,
+        games.ended_at,
+        games.elapsed_seconds,
+        articles.title AS article_title,
+        articles.content AS article_content,
+        categories.id AS category_id,
+        categories.label AS category_name,
+        users.username
+    FROM games
+    JOIN articles ON articles.id = games.article_id
+    JOIN categories ON categories.id = articles.category_id
+    JOIN users ON users.id = games.user_id
+    WHERE games.id = ?
+`);
+
+const findRevealedWordsByGameIdStatement = db.prepare<[number], RevealedWordRow>(`
+    SELECT normalized_word
+    FROM game_revealed_words
+    WHERE game_id = ?
 `);
 
 const createArticleStatement = db.prepare<{
@@ -115,4 +146,12 @@ const createGameTransaction = db.transaction((gameData: GameData): CreatedGame =
 
 export function createGameInDatabase(gameData: GameData): CreatedGame {
     return createGameTransaction(gameData);
+}
+
+export function findGameDetailById(gameId: number): GameDetailRow | null {
+    return findGameDetailByIdStatement.get(gameId) ?? null;
+}
+
+export function findRevealedWordsByGameId(gameId: number): RevealedWordRow[] {
+    return findRevealedWordsByGameIdStatement.all(gameId);
 }

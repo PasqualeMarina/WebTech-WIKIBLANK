@@ -30,3 +30,16 @@ export type CreatedGame = {
     ended_at: string | null;
     elapsed_seconds: number;
 };
+
+export type GameDetailRow = CreatedGame & {
+    article_title: string;
+    article_content: string;
+    category_id: number;
+    category_name: string;
+    user_id: number;
+    username: string;
+};
+
+export type RevealedWordRow = {
+    normalized_word: string;
+};

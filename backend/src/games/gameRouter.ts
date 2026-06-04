@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Response } from 'express';
-import { GameContentUnavailableError, GameStorageError, InvalidGameCategoryError } from './gameErrors.js';
-import { createGame } from './gameService.js';
+import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from './gameErrors.js';
+import { createGame, getGameDetail } from './gameService.js';
 
 export const gameRouter = Router();
 
@@ -46,5 +46,32 @@ gameRouter.post('/', async (req, res) => {
         res.status(201).json({ game: newGame });
     } catch (error) {
         sendCreateGameError(error, res);
+    }
+});
+
+gameRouter.get('/:gameId', (req, res) => {
+    if (req.session.userId === undefined) {
+        res.status(401).json({ message: 'Unauthorized' });
+        return;
+    }
+
+    const gameId = Number(req.params.gameId);
+
+    if (!Number.isInteger(gameId) || gameId <= 0) {
+        res.status(400).json({ message: 'Invalid game id' });
+        return;
+    }
+
+    try {
+        const game = getGameDetail(gameId, req.session.userId);
+        res.json({ game });
+    } catch (error) {
+        if (error instanceof GameNotFoundError || error instanceof GameAccessDeniedError) {
+            res.status(404).json({ message: 'Game not found' });
+            return;
+        }
+
+        console.error('Error loading game:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });

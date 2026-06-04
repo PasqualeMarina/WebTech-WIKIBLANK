@@ -1,12 +1,18 @@
-import { createGameInDatabase } from "./gameRepository.js";
+import { createGameInDatabase, findGameDetailById, findRevealedWordsByGameId } from "./gameRepository.js";
 import { gameCategories } from "../../../shared/gameCategories.js";
-import { GameContentUnavailableError, GameStorageError, InvalidGameCategoryError } from "./gameErrors.js";
+import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from "./gameErrors.js";
 import type { WikipediaGameResponse, GameData } from "./gameTypes.js";
+import type { ArticleParagraph } from "../../../shared/articles.js";
+import type { GameDetail } from "../../../shared/games.js";
 
 const RANDOM_IN_CATEGORY_API_URL = 'https://randomincategory.toolforge.org/w/api.php';
 const WIKIPEDIA_SITE = 'en.wikipedia.org';
 const MAX_RANDOM_ARTICLE_ATTEMPTS = 5;
 const WIKIPEDIA_API_URL = 'https://en.wikipedia.org/api/rest_v1/page/summary/';
+
+function normalizeWord(word: string): string {
+    return word.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+}
 
 function getRandomCategory() {
     if (gameCategories.length === 0) {
@@ -52,6 +58,23 @@ function getArticleTitle(articleUrl: string): string {
         : parsedArticleUrl.pathname.slice(1);
 
     return (titleParam ?? decodeURIComponent(titlePath)).replaceAll('_', ' ');
+}
+
+function buildArticleParagraphs(content: string, revealedWords: Set<string>): ArticleParagraph[] {
+    return content
+        .split(/\n+/)
+        .map((paragraph) => paragraph.trim())
+        .filter((paragraph) => paragraph.length > 0)
+        .map((paragraph) =>
+            paragraph.split(/\s+/).map((word) => {
+                const normalizedWord = normalizeWord(word);
+
+                return {
+                    text: word,
+                    revealed: normalizedWord.length === 0 || revealedWords.has(normalizedWord),
+                };
+            }),
+        );
 }
 
 async function getRandomArticleUrl(category: string): Promise<string> {
@@ -135,4 +158,45 @@ export async function createGame(userId: number, categoryId?: string) {
 
         throw new GameStorageError();
     }
+}
+
+export function getGameDetail(gameId: number, userId: number): GameDetail {
+    const game = findGameDetailById(gameId);
+
+    if (!game) {
+        throw new GameNotFoundError();
+    }
+
+    if (game.status !== 'active' || game.user_id !== userId) {
+        throw new GameAccessDeniedError();
+    }
+
+    const revealedWords = new Set(
+        findRevealedWordsByGameId(gameId).map((word) => word.normalized_word),
+    );
+
+    return {
+        id: game.id,
+        status: game.status,
+        article: {
+            id: game.article_id,
+            title: null,
+            category: {
+                id: game.category_id,
+                name: game.category_name,
+            },
+            paragraphs: buildArticleParagraphs(game.article_content, revealedWords),
+        },
+        player: {
+            id: game.user_id,
+            username: game.username,
+        },
+        currentTitleGuess: game.current_title_guess,
+        revealedWordsCount: game.revealed_words_count,
+        wordGuessesCount: game.word_guesses_count,
+        titleGuessesCount: game.title_guesses_count,
+        elapsedSeconds: game.elapsed_seconds,
+        startedAt: game.started_at,
+        endedAt: game.ended_at,
+    };
 }

@@ -21,3 +21,19 @@ export class GameStorageError extends Error {
         Object.setPrototypeOf(this, GameStorageError.prototype);
     }
 }
+
+export class GameNotFoundError extends Error {
+    constructor() {
+        super('Game not found');
+        this.name = 'GameNotFoundError';
+        Object.setPrototypeOf(this, GameNotFoundError.prototype);
+    }
+}
+
+export class GameAccessDeniedError extends Error {
+    constructor() {
+        super('Game not found');
+        this.name = 'GameAccessDeniedError';
+        Object.setPrototypeOf(this, GameAccessDeniedError.prototype);
+    }
+}
