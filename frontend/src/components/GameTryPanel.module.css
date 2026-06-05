@@ -110,7 +110,8 @@
   outline-offset: 3px;
 }
 
-.primaryAction:disabled {
+.primaryAction:disabled,
+.secondaryAction:disabled {
   cursor: wait;
   opacity: 0.7;
   transform: none;

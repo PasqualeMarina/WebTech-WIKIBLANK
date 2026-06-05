@@ -1,7 +1,7 @@
 import type { Article } from './articles.js'
 import type { AuthUser } from './users.js'
 
-export const GAME_STATUSES = ['active', 'won', 'abandoned'] as const
+export const GAME_STATUSES = ['active', 'won'] as const
 
 export type GameStatus = (typeof GAME_STATUSES)[number]
 
@@ -28,13 +28,18 @@ export type WordGuessRequest = {
 }
 
 export type TitleGuessRequest = {
-  title: string
+  guessedTitle: string
 }
 
 export type GuessResponse = {
   game: GameDetail
   correct: boolean
   revealedWordsCount: number
+}
+
+export type TitleGuessResponse = {
+  game: GameDetail
+  correct: boolean
 }
 
 export type LeaderboardRow = {

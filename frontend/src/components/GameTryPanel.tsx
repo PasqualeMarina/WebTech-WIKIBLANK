@@ -1,19 +1,56 @@
 import { useState, type FormEvent } from 'react'
-import type { GuessResponse } from '../../../shared/games'
+import { useNavigate } from 'react-router-dom'
+import type {
+  GameStatus,
+  GuessResponse,
+  TitleGuessResponse,
+} from '../../../shared/games'
 import styles from './GameTryPanel.module.css'
 
 type GameTryPanelProps = {
-  isReadonly: boolean
+  status: GameStatus
+  playerName: string
+  currentTitleGuess: string | null
+  endedAt: string | null
   onGuessWord: (word: string) => Promise<GuessResponse>
+  onGuessTitle: (title: string) => Promise<TitleGuessResponse>
+}
+
+function formatCompletedAt(timestamp: string | null) {
+  if (!timestamp) {
+    return 'Not available'
+  }
+
+  const normalizedTimestamp = timestamp.includes('T')
+    ? timestamp
+    : `${timestamp.replace(' ', 'T')}Z`
+  const date = new Date(normalizedTimestamp)
+
+  if (Number.isNaN(date.getTime())) {
+    return timestamp
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date)
 }
 
 export function GameTryPanel({
-  isReadonly,
+  status,
+  playerName,
+  currentTitleGuess,
+  endedAt,
   onGuessWord,
+  onGuessTitle,
 }: GameTryPanelProps) {
+  const navigate = useNavigate()
   const [guessedWord, setGuessedWord] = useState('')
   const [wordMessage, setWordMessage] = useState<string | null>(null)
   const [isGuessingWord, setIsGuessingWord] = useState(false)
+  const [guessedTitle, setGuessedTitle] = useState('')
+  const [titleMessage, setTitleMessage] = useState<string | null>(null)
+  const [isGuessingTitle, setIsGuessingTitle] = useState(false)
 
   async function handleWordGuess(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -53,21 +90,47 @@ export function GameTryPanel({
     }
   }
 
-  if (isReadonly) {
+  async function handleTitleGuess(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const title = guessedTitle.trim()
+
+    if (!title) {
+      setTitleMessage('Please enter a title')
+      return
+    }
+
+    setIsGuessingTitle(true)
+    setTitleMessage(null)
+
+    try {
+      const response = await onGuessTitle(title)
+      setTitleMessage(response.correct ? 'Correct title' : 'Incorrect title')
+      setGuessedTitle('')
+    } catch (error) {
+      setTitleMessage(
+        error instanceof Error ? error.message : 'Could not guess title',
+      )
+    } finally {
+      setIsGuessingTitle(false)
+    }
+  }
+
+  if (status !== 'active') {
     return (
       <div className={styles.tryPanel} aria-label="Completed game summary">
         <div className={styles.summaryGrid}>
           <div className={styles.summaryItem}>
             <span>Winner</span>
-            <strong>Donato</strong>
+            <strong>{playerName}</strong>
           </div>
           <div className={styles.summaryItem}>
-            <span>Word guesses</span>
-            <strong>10</strong>
+            <span>Result</span>
+            <strong>Victory</strong>
           </div>
           <div className={styles.summaryItem}>
-            <span>Title guesses</span>
-            <strong>2</strong>
+            <span>Finished</span>
+            <strong>{formatCompletedAt(endedAt)}</strong>
           </div>
         </div>
       </div>
@@ -110,21 +173,50 @@ export function GameTryPanel({
           ) : null}
         </form>
 
-        <label className={styles.field}>
-          <span>Guess title</span>
-          <input type="text" placeholder="Article title" />
-        </label>
-        <button type="button" className={styles.secondaryAction}>
-          Try title
-        </button>
+        <form className={styles.guessForm} onSubmit={handleTitleGuess}>
+          <label className={styles.field}>
+            <span>Guess title</span>
+            <input
+              type="text"
+              placeholder="Article title"
+              value={guessedTitle}
+              onChange={(event) => {
+                setGuessedTitle(event.target.value)
+                setTitleMessage(null)
+              }}
+              disabled={isGuessingTitle}
+              aria-describedby={titleMessage ? 'title-guess-message' : undefined}
+            />
+          </label>
+          <button
+            type="submit"
+            className={styles.secondaryAction}
+            disabled={isGuessingTitle}
+          >
+            {isGuessingTitle ? 'Trying...' : 'Try title'}
+          </button>
+          {titleMessage ? (
+            <p
+              id="title-guess-message"
+              className={styles.guessMessage}
+              role="status"
+            >
+              {titleMessage}
+            </p>
+          ) : null}
+        </form>
       </div>
 
       <div className={styles.summaryItem}>
         <span>Current title guess</span>
-        <strong>Not submitted</strong>
+        <strong>{currentTitleGuess ?? 'Not submitted'}</strong>
       </div>
 
-      <button type="button" className={styles.abandonAction}>
+      <button
+        type="button"
+        className={styles.abandonAction}
+        onClick={() => navigate('/home')}
+      >
         Abandon game
       </button>
     </>

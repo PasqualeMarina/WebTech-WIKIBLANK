@@ -84,6 +84,27 @@ const incrementRevealedWordsStatement = db.prepare<[number, number]>(`
     WHERE id = ?
 `);
 
+const recordTitleGuessStatement = db.prepare<{
+    gameId: number;
+    userId: number;
+    guessedTitle: string;
+    correct: number;
+}>(`
+    UPDATE games
+    SET current_title_guess = @guessedTitle,
+        title_guesses_count = title_guesses_count + 1,
+        status = CASE WHEN @correct = 1 THEN 'won' ELSE status END,
+        ended_at = CASE WHEN @correct = 1 THEN CURRENT_TIMESTAMP ELSE ended_at END,
+        elapsed_seconds = CASE
+            WHEN @correct = 1
+            THEN CAST(strftime('%s', CURRENT_TIMESTAMP) - strftime('%s', started_at) AS INTEGER)
+            ELSE elapsed_seconds
+        END
+    WHERE id = @gameId
+      AND user_id = @userId
+      AND status = 'active'
+`);
+
 const createArticleStatement = db.prepare<{
     categoryId: number;
     title: string;
@@ -189,6 +210,24 @@ export function findRevealedWordsByGameId(gameId: number): RevealedWordRow[] {
 
 export function hasActiveGameAccess(gameId: number, userId: number): boolean {
     return findActiveGameForUserStatement.get(gameId, userId) !== undefined;
+}
+
+export function recordTitleGuess(
+    gameId: number,
+    userId: number,
+    guessedTitle: string,
+    correct: boolean,
+): void {
+    const result = recordTitleGuessStatement.run({
+        gameId,
+        userId,
+        guessedTitle,
+        correct: correct ? 1 : 0,
+    });
+
+    if (result.changes === 0) {
+        throw new GameStorageError('Failed to record title guess');
+    }
 }
 
 const recordWordGuessTransaction = db.transaction((

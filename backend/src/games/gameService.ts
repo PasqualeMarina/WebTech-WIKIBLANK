@@ -1,9 +1,9 @@
-import { createGameInDatabase, findGameDetailById, findRevealedWordsByGameId, hasActiveGameAccess, recordWordGuess } from "./gameRepository.js";
+import { createGameInDatabase, findGameDetailById, findRevealedWordsByGameId, hasActiveGameAccess, recordTitleGuess, recordWordGuess } from "./gameRepository.js";
 import { gameCategories } from "../../../shared/gameCategories.js";
 import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from "./gameErrors.js";
 import type { WikipediaGameResponse, GameData } from "./gameTypes.js";
 import type { ArticleParagraph } from "../../../shared/articles.js";
-import type { GameDetail, GuessResponse } from "../../../shared/games.js";
+import type { GameDetail, GuessResponse, TitleGuessResponse } from "../../../shared/games.js";
 import { commonWords } from "./commonWords.js";
 
 const RANDOM_IN_CATEGORY_API_URL = 'https://randomincategory.toolforge.org/w/api.php';
@@ -258,7 +258,7 @@ export function getGameDetail(gameId: number, userId: number): GameDetail {
         throw new GameNotFoundError();
     }
 
-    if (game.status !== 'active' || game.user_id !== userId) {
+    if (game.user_id !== userId) {
         throw new GameAccessDeniedError();
     }
 
@@ -272,7 +272,7 @@ export function getGameDetail(gameId: number, userId: number): GameDetail {
         status: game.status,
         article: {
             id: game.article_id,
-            title: null,
+            title: game.status === 'won' ? game.article_title : null,
             category: {
                 id: game.category_id,
                 name: game.category_name,
@@ -339,5 +339,29 @@ export function tryWordGuess(gameId: number, userId: number, guessedWord: string
         game: updatedGame,
         correct,
         revealedWordsCount,
+    };
+}
+
+export function tryTitleGuess(gameId: number, userId: number, guessedTitle: string): TitleGuessResponse {
+    const normalizedGuess = normalizeWord(guessedTitle);
+
+    if (normalizedGuess.length === 0) {
+        throw new GameAccessDeniedError();
+    }
+
+    assertActiveGameAccess(gameId, userId);
+
+    const game = findGameDetailById(gameId);
+
+    if (!game) {
+        throw new GameNotFoundError();
+    }
+
+    const correct = normalizedGuess === normalizeWord(game.article_title);
+    recordTitleGuess(gameId, userId, guessedTitle.trim(), correct);
+
+    return {
+        game: getGameDetail(gameId, userId),
+        correct,
     };
 }

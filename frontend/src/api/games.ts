@@ -1,5 +1,10 @@
 import { apiClient } from './client'
-import type { GameResponse, GuessResponse, StartGameRequest } from '../../../shared/games'
+import type {
+  GameResponse,
+  GuessResponse,
+  StartGameRequest,
+  TitleGuessResponse,
+} from '../../../shared/games'
 
 export async function createGame(
   data: StartGameRequest = {},
@@ -18,5 +23,16 @@ export async function guessWord(
   guessedWord: string,
 ): Promise<GuessResponse> {
   const response = await apiClient.post<GuessResponse>(`/games/${gameId}/guessWord`, { guessedWord })
+  return response.data
+}
+
+export async function guessTitle(
+  gameId: string | number,
+  guessedTitle: string,
+): Promise<TitleGuessResponse> {
+  const response = await apiClient.post<TitleGuessResponse>(
+    `/games/${gameId}/guessTitle`,
+    { guessedTitle },
+  )
   return response.data
 }

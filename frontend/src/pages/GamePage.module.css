@@ -80,7 +80,7 @@
   box-shadow: 0 10px 22px rgba(44, 91, 158, 0.18);
 }
 
-.completedStatus {
+.wonStatus {
   background: linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
 }
 

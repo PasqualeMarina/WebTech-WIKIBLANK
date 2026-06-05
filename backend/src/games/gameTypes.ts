@@ -27,7 +27,7 @@ export type CreatedGame = {
     id: number;
     user_id: number;
     article_id: number;
-    status: 'active' | 'won' | 'abandoned';
+    status: 'active' | 'won';
     current_title_guess: string | null;
     revealed_words_count: number;
     word_guesses_count: number;

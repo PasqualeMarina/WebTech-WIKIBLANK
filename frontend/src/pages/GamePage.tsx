@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getApiErrorMessage } from '../api/client'
-import { getGame, guessWord } from '../api/games'
+import { getGame, guessTitle, guessWord } from '../api/games'
 import { GameTryPanel } from '../components/GameTryPanel'
 import { PageHeader } from '../components/PageHeader'
 import type { GameDetail } from '../../../shared/games'
@@ -14,12 +14,19 @@ function formatElapsedTime(totalSeconds: number) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
+function getStatusLabel(status: GameDetail['status']) {
+  if (status === 'won') {
+    return 'Won'
+  }
+
+  return 'Active'
+}
+
 export function GamePage() {
   const { gameId } = useParams()
   const [game, setGame] = useState<GameDetail | null>(null)
   const [isLoading, setIsLoading] = useState(() => Boolean(gameId))
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const isReadonly = game?.status !== 'active'
   const visibleErrorMessage = gameId ? errorMessage : 'Game not found'
 
   useEffect(() => {
@@ -62,14 +69,32 @@ export function GamePage() {
       setGame(response.game)
       return response
     } catch (error) {
-      throw new Error(getApiErrorMessage(error, 'Could not guess word'))
+      throw new Error(getApiErrorMessage(error, 'Could not guess word'), {
+        cause: error,
+      })
+    }
+  }
+
+  async function handleGuessTitle(title: string) {
+    if (!gameId) {
+      throw new Error('Game not found')
+    }
+
+    try {
+      const response = await guessTitle(gameId, title)
+      setGame(response.game)
+      return response
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Could not guess title'), {
+        cause: error,
+      })
     }
   }
 
   return (
     <section className={styles.gamePage} aria-labelledby="game-title">
       <PageHeader
-        title={isReadonly ? 'Completed game' : 'Current game'}
+        title={game?.status === 'won' ? 'Game won' : 'Current game'}
         titleId="game-title"
       />
 
@@ -96,12 +121,12 @@ export function GamePage() {
             <span
               className={[
                 styles.statusBadge,
-                isReadonly ? styles.completedStatus : '',
+                game.status === 'won' ? styles.wonStatus : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
             >
-              {isReadonly ? 'Completed' : 'Active'}
+              {getStatusLabel(game.status)}
             </span>
           </div>
 
@@ -134,11 +159,23 @@ export function GamePage() {
               <span>Revealed Words</span>
               <strong>{game.revealedWordsCount}</strong>
             </div>
+            <div className={styles.statCard}>
+              <span>Word guesses</span>
+              <strong>{game.wordGuessesCount}</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span>Title guesses</span>
+              <strong>{game.titleGuessesCount}</strong>
+            </div>
           </div>
 
           <GameTryPanel
-            isReadonly={isReadonly}
+            status={game.status}
+            playerName={game.player.username}
+            currentTitleGuess={game.currentTitleGuess}
+            endedAt={game.endedAt}
             onGuessWord={handleGuessWord}
+            onGuessTitle={handleGuessTitle}
           />
         </aside>
       </div>
