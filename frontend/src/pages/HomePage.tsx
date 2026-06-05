@@ -106,6 +106,7 @@ export function HomePage() {
         <GameCategoryDialog
           categories={gameCategories}
           selectedCategoryId={selectedCategoryId}
+          isCreatingGame={isCreatingGame}
           onSelectCategory={setSelectedCategoryId}
           onClose={() => setIsCategoryDialogOpen(false)}
           onStartGame={handleStartCategoryGame}

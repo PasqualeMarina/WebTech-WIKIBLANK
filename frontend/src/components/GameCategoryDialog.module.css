@@ -165,7 +165,7 @@
 }
 
 .startButton:disabled {
-  cursor: not-allowed;
+  cursor: wait;
   opacity: 0.62;
   transform: none;
 }

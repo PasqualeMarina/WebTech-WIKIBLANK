@@ -5,6 +5,7 @@ import styles from './GameCategoryDialog.module.css'
 type GameCategoryDialogProps = {
   categories: GameCategory[]
   selectedCategoryId: string
+  isCreatingGame: boolean
   onSelectCategory: (categoryId: string) => void
   onClose: () => void
   onStartGame: (categoryId: string) => void
@@ -13,6 +14,7 @@ type GameCategoryDialogProps = {
 export function GameCategoryDialog({
   categories,
   selectedCategoryId,
+  isCreatingGame,
   onSelectCategory,
   onClose,
   onStartGame,
@@ -97,9 +99,9 @@ export function GameCategoryDialog({
             type="button"
             className={styles.startButton}
             onClick={() => onStartGame(selectedCategoryId)}
-            disabled={!selectedCategory}
+            disabled={!selectedCategory || isCreatingGame}
           >
-            Start game
+            {isCreatingGame ? 'Starting game...' : 'Start game'}
           </button>
         </div>
       </section>

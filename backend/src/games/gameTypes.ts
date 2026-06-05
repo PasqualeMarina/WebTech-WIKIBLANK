@@ -1,10 +1,16 @@
 export type WikipediaGameResponse = {
-    title: string;
-    extract: string;
-    thumbnail?: {
-        source: string;
-        width?: number;
-        height?: number;
+    query?: {
+        pages?: Array<{
+            title: string;
+            extract?: string;
+            length?: number;
+            missing?: boolean;
+            thumbnail?: {
+                source: string;
+                width?: number;
+                height?: number;
+            };
+        }>;
     };
 };
 

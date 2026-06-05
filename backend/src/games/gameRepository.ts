@@ -53,6 +53,14 @@ const findRevealedWordsByGameIdStatement = db.prepare<[number], RevealedWordRow>
     WHERE game_id = ?
 `);
 
+const findActiveGameForUserStatement = db.prepare<[number, number], { id: number }>(`
+    SELECT id
+    FROM games
+    WHERE id = ?
+      AND user_id = ?
+      AND status = 'active'
+`);
+
 const createArticleStatement = db.prepare<{
     categoryId: number;
     title: string;
@@ -154,4 +162,8 @@ export function findGameDetailById(gameId: number): GameDetailRow | null {
 
 export function findRevealedWordsByGameId(gameId: number): RevealedWordRow[] {
     return findRevealedWordsByGameIdStatement.all(gameId);
+}
+
+export function hasActiveGameAccess(gameId: number, userId: number): boolean {
+    return findActiveGameForUserStatement.get(gameId, userId) !== undefined;
 }
