@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/authContext'
 import styles from './AuthStatus.module.css'
+import { useNavigate } from 'react-router-dom'
 
 export function AuthStatus() {
   const { currentUser, isLoading, logout } = useAuth()
+  const navigate = useNavigate()
 
   async function handleLogout() {
     await logout()
+    navigate('/home', { replace: true })
   }
 
   if (isLoading) {
