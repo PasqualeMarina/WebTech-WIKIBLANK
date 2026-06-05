@@ -98,14 +98,26 @@
 }
 
 .hiddenWord {
-  width: max(0.65em, calc(var(--word-length) * 0.58em));
-  height: 0.82em;
-  margin: 0 5px -1px;
+  margin: 0 0.3em;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.1em;
+}
+
+.hiddenLetter {
+  width: 0.42em;
+  height: 0.18em;
   border-radius: 999px;
-  background:
-    linear-gradient(90deg, rgba(74, 132, 217, 0.92), rgba(255, 215, 108, 0.9));
-  display: inline-block;
-  box-shadow: 0 4px 12px rgba(44, 91, 158, 0.14);
+  background: var(--brand-yellow);
+  box-shadow: 0 2px 5px rgba(44, 91, 158, 0.16);
+}
+
+.hiddenLetter:nth-child(3n + 2) {
+  background: var(--brand-blue);
+}
+
+.hiddenLetter:nth-child(3n) {
+  background: var(--brand-blue-dark);
 }
 
 .sidePanel {

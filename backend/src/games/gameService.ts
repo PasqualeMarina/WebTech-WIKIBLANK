@@ -13,7 +13,7 @@ const MAX_SUITABLE_ARTICLE_ATTEMPTS = 10;
 const MAX_WIKIPEDIA_REQUEST_ATTEMPTS = 3;
 const MAX_RETRY_DELAY_MS = 30_000;
 const MIN_ARTICLE_SIZE_BYTES = 1_000;
-const MAX_ARTICLE_SIZE_BYTES = 30_000;
+const MAX_ARTICLE_SIZE_BYTES = 15_000;
 const WIKIPEDIA_API_URL = 'https://en.wikipedia.org/w/api.php';
 const EXTERNAL_REQUEST_HEADERS = {
     'User-Agent': 'WikiBlank/1.0 (educational web application)',

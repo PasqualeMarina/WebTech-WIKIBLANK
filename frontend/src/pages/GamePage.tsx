@@ -140,13 +140,16 @@ export function GamePage() {
                     <span
                       key={`hidden-${paragraphIndex}-${wordIndex}`}
                       className={styles.hiddenWord}
-                      style={
-                        {
-                          '--word-length': word.length,
-                        } as React.CSSProperties
-                      }
-                      aria-label="Hidden word"
-                    ></span>
+                      aria-label={`Hidden word with ${word.length} characters`}
+                    >
+                      {Array.from({ length: word.length }, (_, letterIndex) => (
+                        <span
+                          key={letterIndex}
+                          className={styles.hiddenLetter}
+                          aria-hidden="true"
+                        />
+                      ))}
+                    </span>
                   ),
                 )}
               </p>
