@@ -3,10 +3,15 @@ export type ArticleCategory = {
   name: string
 }
 
-export type ArticleWord = {
-  text: string
-  revealed: boolean
-}
+export type ArticleWord =
+  | {
+      text: string
+      revealed: true
+    }
+  | {
+      length: number
+      revealed: false
+    }
 
 export type ArticleParagraph = ArticleWord[]
 

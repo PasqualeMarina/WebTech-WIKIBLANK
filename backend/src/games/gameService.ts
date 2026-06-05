@@ -154,10 +154,18 @@ function buildArticleParagraphs(content: string, revealedWords: Set<string>): Ar
         .map((paragraph) =>
             paragraph.split(/\s+/).map((word) => {
                 const normalizedWord = normalizeWord(word);
+                const revealed = normalizedWord.length === 0 || revealedWords.has(normalizedWord) || commonWords.has(normalizedWord);
+
+                if (revealed) {
+                    return {
+                        text: word,
+                        revealed: true,
+                    };
+                }
 
                 return {
-                    text: word,
-                    revealed: normalizedWord.length === 0 || revealedWords.has(normalizedWord) || commonWords.has(normalizedWord),
+                    length: Array.from(word).length,
+                    revealed: false,
                 };
             }),
         );
