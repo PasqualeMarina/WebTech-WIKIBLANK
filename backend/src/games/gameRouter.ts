@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Response } from 'express';
 import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from './gameErrors.js';
-import { assertActiveGameAccess, createGame, getGameDetail } from './gameService.js';
+import { createGame, getGameDetail, tryWordGuess } from './gameService.js';
 
 export const gameRouter = Router();
 
@@ -43,6 +43,20 @@ function getRequestedCategory(body: unknown): string | null | undefined {
     }
 
     return category.trim();
+}
+
+function getGuessedWord(body: unknown): string | null {
+    if (typeof body !== 'object' || body === null || !('guessedWord' in body)) {
+        return null;
+    }
+
+    const guessedWord = (body as { guessedWord?: unknown }).guessedWord;
+
+    if (typeof guessedWord !== 'string' || guessedWord.trim() === '') {
+        return null;
+    }
+
+    return guessedWord.trim();
 }
 
 gameRouter.post('/', async (req, res) => {
@@ -108,24 +122,23 @@ gameRouter.post('/:gameId/guessWord', (req, res) => {
         return;
     }
 
+    const guessedWord = getGuessedWord(req.body);
+
+    if (guessedWord === null) {
+        res.status(400).json({ message: 'Invalid guessed word' });
+        return;
+    }
+
     try {
-        assertActiveGameAccess(gameId, userId);
+        res.json(tryWordGuess(gameId, userId, guessedWord));
     } catch (error) {
         if (error instanceof GameAccessDeniedError) {
             res.status(404).json({ message: 'Game not found' });
             return;
         }
 
-        console.error('Error checking game access:', error);
+        console.error('Error trying word guess:', error);
         res.status(500).json({ message: 'Internal server error' });
-        return;
-    }
-
-    const guessedWord = req.body.guessedWord;
-
-    if (typeof guessedWord !== 'string' || guessedWord.trim() === '') {
-        res.status(400).json({ message: 'Invalid guessed word' });
-        return;
     }
 });
 

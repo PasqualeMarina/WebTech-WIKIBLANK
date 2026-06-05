@@ -24,7 +24,7 @@ export type StartGameRequest = {
 }
 
 export type WordGuessRequest = {
-  word: string
+  guessedWord: string
 }
 
 export type TitleGuessRequest = {

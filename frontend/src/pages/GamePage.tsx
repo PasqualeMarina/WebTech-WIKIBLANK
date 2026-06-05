@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getApiErrorMessage } from '../api/client'
-import { getGame } from '../api/games'
+import { getGame, guessWord } from '../api/games'
 import { GameTryPanel } from '../components/GameTryPanel'
 import { PageHeader } from '../components/PageHeader'
 import type { GameDetail } from '../../../shared/games'
@@ -51,6 +51,20 @@ export function GamePage() {
       isMounted = false
     }
   }, [gameId])
+
+  async function handleGuessWord(word: string) {
+    if (!gameId) {
+      throw new Error('Game not found')
+    }
+
+    try {
+      const response = await guessWord(gameId, word)
+      setGame(response.game)
+      return response
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Could not guess word'))
+    }
+  }
 
   return (
     <section className={styles.gamePage} aria-labelledby="game-title">
@@ -122,7 +136,10 @@ export function GamePage() {
             </div>
           </div>
 
-          <GameTryPanel isReadonly={isReadonly} />
+          <GameTryPanel
+            isReadonly={isReadonly}
+            onGuessWord={handleGuessWord}
+          />
         </aside>
       </div>
       ) : null}

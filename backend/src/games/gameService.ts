@@ -1,9 +1,9 @@
-import { createGameInDatabase, findGameDetailById, findRevealedWordsByGameId, hasActiveGameAccess } from "./gameRepository.js";
+import { createGameInDatabase, findGameDetailById, findRevealedWordsByGameId, hasActiveGameAccess, recordWordGuess } from "./gameRepository.js";
 import { gameCategories } from "../../../shared/gameCategories.js";
 import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from "./gameErrors.js";
 import type { WikipediaGameResponse, GameData } from "./gameTypes.js";
 import type { ArticleParagraph } from "../../../shared/articles.js";
-import type { GameDetail } from "../../../shared/games.js";
+import type { GameDetail, GuessResponse } from "../../../shared/games.js";
 import { commonWords } from "./commonWords.js";
 
 const RANDOM_IN_CATEGORY_API_URL = 'https://randomincategory.toolforge.org/w/api.php';
@@ -297,4 +297,47 @@ export function assertActiveGameAccess(gameId: number, userId: number): void {
     if (!hasActiveGameAccess(gameId, userId)) {
         throw new GameAccessDeniedError();
     }
+}
+
+export function tryWordGuess(gameId: number, userId: number, guessedWord: string): GuessResponse {
+    const normalizedGuess = normalizeWord(guessedWord);
+
+    if (normalizedGuess.length === 0) {
+        throw new GameAccessDeniedError();
+    }
+
+    assertActiveGameAccess(gameId, userId);
+
+    const game = findGameDetailById(gameId);
+
+    if (!game) {
+        throw new GameNotFoundError();
+    }
+
+    let occurrenceCount = 0;
+
+    for (const word of game.article_content.split(/\s+/)) {
+        if (normalizeWord(word) === normalizedGuess) {
+            occurrenceCount += 1;
+        }
+    }
+
+    const correct = occurrenceCount > 0;
+    const revealCount = correct && !commonWords.has(normalizedGuess) ? occurrenceCount : 0;
+
+    const revealedWordsCount = recordWordGuess(
+        gameId,
+        userId,
+        guessedWord.trim(),
+        normalizedGuess,
+        revealCount,
+    );
+
+    const updatedGame = getGameDetail(gameId, userId);
+
+    return {
+        game: updatedGame,
+        correct,
+        revealedWordsCount,
+    };
 }

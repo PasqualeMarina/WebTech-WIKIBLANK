@@ -61,6 +61,29 @@ const findActiveGameForUserStatement = db.prepare<[number, number], { id: number
       AND status = 'active'
 `);
 
+const incrementWordGuessesStatement = db.prepare<[number, number]>(`
+    UPDATE games
+    SET word_guesses_count = word_guesses_count + 1
+    WHERE id = ?
+      AND user_id = ?
+      AND status = 'active'
+`);
+
+const insertRevealedWordStatement = db.prepare<{
+    gameId: number;
+    word: string;
+    normalizedWord: string;
+}>(`
+    INSERT OR IGNORE INTO game_revealed_words (game_id, word, normalized_word)
+    VALUES (@gameId, @word, @normalizedWord)
+`);
+
+const incrementRevealedWordsStatement = db.prepare<[number, number]>(`
+    UPDATE games
+    SET revealed_words_count = revealed_words_count + ?
+    WHERE id = ?
+`);
+
 const createArticleStatement = db.prepare<{
     categoryId: number;
     title: string;
@@ -166,4 +189,43 @@ export function findRevealedWordsByGameId(gameId: number): RevealedWordRow[] {
 
 export function hasActiveGameAccess(gameId: number, userId: number): boolean {
     return findActiveGameForUserStatement.get(gameId, userId) !== undefined;
+}
+
+const recordWordGuessTransaction = db.transaction((
+    gameId: number,
+    userId: number,
+    word: string,
+    normalizedWord: string,
+    occurrenceCount: number,
+): number => {
+    if (incrementWordGuessesStatement.run(gameId, userId).changes === 0) {
+        throw new GameStorageError('Failed to update word guess count');
+    }
+
+    if (occurrenceCount === 0) {
+        return 0;
+    }
+
+    const inserted = insertRevealedWordStatement.run({
+        gameId,
+        word,
+        normalizedWord,
+    });
+
+    if (inserted.changes > 0) {
+        incrementRevealedWordsStatement.run(occurrenceCount, gameId);
+        return occurrenceCount;
+    }
+
+    return 0;
+});
+
+export function recordWordGuess(
+    gameId: number,
+    userId: number,
+    word: string,
+    normalizedWord: string,
+    occurrenceCount: number,
+): number {
+    return recordWordGuessTransaction(gameId, userId, word, normalizedWord, occurrenceCount);
 }
