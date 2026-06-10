@@ -43,12 +43,21 @@ export type TitleGuessResponse = {
 }
 
 export type LeaderboardRow = {
-  userId: number
   username: string
-  completedGames: number
-  averageTimeSeconds: number
+  gamesWon: number
+  totalGamesPlayed: number
+  winPercentage: number
+  averageWinTimeSeconds: number | null
 }
 
 export type GameResponse = {
   game: GameDetail
+}
+
+export type CompletedGamesResponse = {
+  games: GameDetail[]
+}
+
+export type LeaderboardResponse = {
+  players: LeaderboardRow[]
 }

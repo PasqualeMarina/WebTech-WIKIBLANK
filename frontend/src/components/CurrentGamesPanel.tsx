@@ -13,6 +13,7 @@ export function CurrentGamesPanel() {
       title="Current games"
       titleId="current-games-title"
       columns={currentGameColumns}
+      rows={[]}
       emptyMessage="No current games"
     />
   )

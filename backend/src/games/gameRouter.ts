@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Response } from 'express';
 import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from './gameErrors.js';
-import { createGame, getGameDetail, tryTitleGuess, tryWordGuess } from './gameService.js';
+import { createGame, getCompletedGames, getGameDetail, getLeaderboard, tryTitleGuess, tryWordGuess } from './gameService.js';
 
 export const gameRouter = Router();
 
@@ -95,12 +95,25 @@ gameRouter.post('/', async (req, res) => {
     }
 });
 
-gameRouter.get('/:gameId', (req, res) => {
-    if (req.session.userId === undefined) {
-        res.status(401).json({ message: 'Unauthorized' });
-        return;
+gameRouter.get('/completedGames', (_req, res) => {
+    try {
+        res.json({ games: getCompletedGames() });
+    } catch (error) {
+        console.error('Error loading completed games:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
+});
 
+gameRouter.get('/leaderboard', (_req, res) => {
+    try {
+        res.json({ players: getLeaderboard() });
+    } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+gameRouter.get('/:gameId', (req, res) => {
     const gameId = Number(req.params.gameId);
 
     if (!Number.isInteger(gameId) || gameId <= 0) {

@@ -1,6 +1,6 @@
 import { db } from '../db/database.js';
 import { GameStorageError } from './gameErrors.js';
-import type { CreatedGame, GameData, GameDetailRow, RevealedWordRow } from './gameTypes.js';
+import type { CreatedGame, GameData, GameDetailRow, LeaderboardRow, RevealedWordRow } from './gameTypes.js';
 
 type CategoryRow = {
     id: number;
@@ -47,6 +47,47 @@ const findGameDetailByIdStatement = db.prepare<[number], GameDetailRow>(`
     WHERE games.id = ?
 `);
 
+const findCompletedGameDetailsStatement = db.prepare<[], GameDetailRow>(`
+    SELECT
+        games.id,
+        games.user_id,
+        games.article_id,
+        games.status,
+        games.current_title_guess,
+        games.revealed_words_count,
+        games.word_guesses_count,
+        games.title_guesses_count,
+        games.started_at,
+        games.ended_at,
+        games.elapsed_seconds,
+        articles.title AS article_title,
+        articles.content AS article_content,
+        categories.id AS category_id,
+        categories.label AS category_name,
+        users.username
+    FROM games
+    JOIN articles ON articles.id = games.article_id
+    JOIN categories ON categories.id = articles.category_id
+    JOIN users ON users.id = games.user_id
+    WHERE games.status = 'won'
+    ORDER BY games.ended_at DESC
+`);
+
+const findLeaderboardStatement = db.prepare<[], LeaderboardRow>(`
+    SELECT
+        users.username,
+        COUNT(CASE WHEN games.status = 'won' THEN 1 END) AS gamesWon,
+        COUNT(games.id) AS totalGamesPlayed,
+        CASE
+            WHEN COUNT(games.id) = 0 THEN 0
+            ELSE 100.0 * COUNT(CASE WHEN games.status = 'won' THEN 1 END) / COUNT(games.id)
+        END AS winPercentage,
+        AVG(CASE WHEN games.status = 'won' THEN games.elapsed_seconds END) AS averageWinTimeSeconds
+    FROM users
+    LEFT JOIN games ON games.user_id = users.id
+    GROUP BY users.id, users.username
+`);
+
 const findRevealedWordsByGameIdStatement = db.prepare<[number], RevealedWordRow>(`
     SELECT normalized_word
     FROM game_revealed_words
@@ -71,17 +112,27 @@ const incrementWordGuessesStatement = db.prepare<[number, number]>(`
 
 const insertRevealedWordStatement = db.prepare<{
     gameId: number;
+    userId: number;
     word: string;
     normalizedWord: string;
 }>(`
     INSERT OR IGNORE INTO game_revealed_words (game_id, word, normalized_word)
-    VALUES (@gameId, @word, @normalizedWord)
+    SELECT @gameId, @word, @normalizedWord
+    WHERE EXISTS (
+        SELECT 1
+        FROM games
+        WHERE id = @gameId
+          AND user_id = @userId
+          AND status = 'active'
+    )
 `);
 
-const incrementRevealedWordsStatement = db.prepare<[number, number]>(`
+const incrementRevealedWordsStatement = db.prepare<[number, number, number]>(`
     UPDATE games
     SET revealed_words_count = revealed_words_count + ?
     WHERE id = ?
+      AND user_id = ?
+      AND status = 'active'
 `);
 
 const recordTitleGuessStatement = db.prepare<{
@@ -204,6 +255,14 @@ export function findGameDetailById(gameId: number): GameDetailRow | null {
     return findGameDetailByIdStatement.get(gameId) ?? null;
 }
 
+export function findCompletedGameDetails(): GameDetailRow[] {
+    return findCompletedGameDetailsStatement.all();
+}
+
+export function findLeaderboard(): LeaderboardRow[] {
+    return findLeaderboardStatement.all();
+}
+
 export function findRevealedWordsByGameId(gameId: number): RevealedWordRow[] {
     return findRevealedWordsByGameIdStatement.all(gameId);
 }
@@ -230,6 +289,41 @@ export function recordTitleGuess(
     }
 }
 
+function insertRevealedWord(
+    gameId: number,
+    userId: number,
+    word: string,
+    normalizedWord: string,
+    occurrenceCount: number,
+): number {
+    if (occurrenceCount === 0) {
+        return 0;
+    }
+
+    const inserted = insertRevealedWordStatement.run({
+        gameId,
+        userId,
+        word,
+        normalizedWord,
+    });
+
+    if (inserted.changes > 0) {
+        const incremented = incrementRevealedWordsStatement.run(
+            occurrenceCount,
+            gameId,
+            userId,
+        );
+
+        if (incremented.changes === 0) {
+            throw new GameStorageError('Failed to update revealed word count');
+        }
+
+        return occurrenceCount;
+    }
+
+    return 0;
+}
+
 const recordWordGuessTransaction = db.transaction((
     gameId: number,
     userId: number,
@@ -241,22 +335,7 @@ const recordWordGuessTransaction = db.transaction((
         throw new GameStorageError('Failed to update word guess count');
     }
 
-    if (occurrenceCount === 0) {
-        return 0;
-    }
-
-    const inserted = insertRevealedWordStatement.run({
-        gameId,
-        word,
-        normalizedWord,
-    });
-
-    if (inserted.changes > 0) {
-        incrementRevealedWordsStatement.run(occurrenceCount, gameId);
-        return occurrenceCount;
-    }
-
-    return 0;
+    return insertRevealedWord(gameId, userId, word, normalizedWord, occurrenceCount);
 });
 
 export function recordWordGuess(
@@ -267,4 +346,22 @@ export function recordWordGuess(
     occurrenceCount: number,
 ): number {
     return recordWordGuessTransaction(gameId, userId, word, normalizedWord, occurrenceCount);
+}
+
+const recordRevealedWordTransaction = db.transaction(insertRevealedWord);
+
+export function recordRevealedWord(
+    gameId: number,
+    userId: number,
+    word: string,
+    normalizedWord: string,
+    occurrenceCount: number,
+): number {
+    return recordRevealedWordTransaction(
+        gameId,
+        userId,
+        word,
+        normalizedWord,
+        occurrenceCount,
+    );
 }

@@ -46,6 +46,8 @@ export type GameDetailRow = CreatedGame & {
     username: string;
 };
 
+export type { LeaderboardRow } from '../../../shared/games.js';
+
 export type RevealedWordRow = {
     normalized_word: string;
 };

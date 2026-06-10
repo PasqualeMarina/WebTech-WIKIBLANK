@@ -1,7 +1,7 @@
-import { createGameInDatabase, findGameDetailById, findRevealedWordsByGameId, hasActiveGameAccess, recordTitleGuess, recordWordGuess } from "./gameRepository.js";
+import { createGameInDatabase, findCompletedGameDetails, findGameDetailById, findLeaderboard, findRevealedWordsByGameId, hasActiveGameAccess, recordRevealedWord, recordTitleGuess, recordWordGuess } from "./gameRepository.js";
 import { gameCategories } from "../../../shared/gameCategories.js";
 import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from "./gameErrors.js";
-import type { WikipediaGameResponse, GameData } from "./gameTypes.js";
+import type { WikipediaGameResponse, GameData, GameDetailRow, LeaderboardRow } from "./gameTypes.js";
 import type { ArticleParagraph } from "../../../shared/articles.js";
 import type { GameDetail, GuessResponse, TitleGuessResponse } from "../../../shared/games.js";
 import { commonWords } from "./commonWords.js";
@@ -259,21 +259,10 @@ export async function createGame(userId: number, categoryId?: string) {
     );
 }
 
-export function getGameDetail(gameId: number, userId: number): GameDetail {
-    const game = findGameDetailById(gameId);
-
-    if (!game) {
-        throw new GameNotFoundError();
-    }
-
-    if (game.user_id !== userId) {
-        throw new GameAccessDeniedError();
-    }
-
+function buildGameDetail(game: GameDetailRow): GameDetail {
     const revealedWords = new Set(
-        findRevealedWordsByGameId(gameId).map((word) => word.normalized_word),
+        findRevealedWordsByGameId(game.id).map((word) => word.normalized_word),
     );
-
 
     return {
         id: game.id,
@@ -299,6 +288,28 @@ export function getGameDetail(gameId: number, userId: number): GameDetail {
         startedAt: game.started_at,
         endedAt: game.ended_at,
     };
+}
+
+export function getGameDetail(gameId: number, userId?: number): GameDetail {
+    const game = findGameDetailById(gameId);
+
+    if (!game) {
+        throw new GameNotFoundError();
+    }
+
+    if (game.status !== 'won' && game.user_id !== userId) {
+        throw new GameAccessDeniedError();
+    }
+
+    return buildGameDetail(game);
+}
+
+export function getCompletedGames(): GameDetail[] {
+    return findCompletedGameDetails().map(buildGameDetail);
+}
+
+export function getLeaderboard(): LeaderboardRow[] {
+    return findLeaderboard();
 }
 
 export function assertActiveGameAccess(gameId: number, userId: number): void {
@@ -341,10 +352,14 @@ export function tryWordGuess(gameId: number, userId: number, guessedWord: string
         revealCount,
     );
 
-    const updatedGame = getGameDetail(gameId, userId);
+    const gameAfterGuess = getGameDetail(gameId, userId);
+
+    if (gameAfterGuess.wordGuessesCount % 3 === 0) {
+        revealRandomWord(gameId, userId);
+    }
 
     return {
-        game: updatedGame,
+        game: getGameDetail(gameId, userId),
         correct,
         revealedWordsCount,
     };
@@ -372,4 +387,61 @@ export function tryTitleGuess(gameId: number, userId: number, guessedTitle: stri
         game: getGameDetail(gameId, userId),
         correct,
     };
+}
+
+function revealRandomWord(gameId: number, userId: number): void {
+    assertActiveGameAccess(gameId, userId);
+
+    const game = findGameDetailById(gameId);
+
+    if (!game) {
+        throw new GameNotFoundError();
+    }
+
+    const revealedWords = new Set(
+        findRevealedWordsByGameId(gameId).map(({ normalized_word }) => normalized_word),
+    );
+    const occurrenceCounts = new Map<string, number>();
+    let selectedWord = '';
+    let selectedNormalizedWord = '';
+    let candidateCount = 0;
+
+    for (const word of game.article_content.split(/\s+/)) {
+        const normalizedWord = normalizeWord(word);
+
+        if (
+            normalizedWord.length === 0
+            || commonWords.has(normalizedWord)
+            || revealedWords.has(normalizedWord)
+        ) {
+            continue;
+        }
+
+        const occurrenceCount = occurrenceCounts.get(normalizedWord);
+
+        if (occurrenceCount !== undefined) {
+            occurrenceCounts.set(normalizedWord, occurrenceCount + 1);
+            continue;
+        }
+
+        occurrenceCounts.set(normalizedWord, 1);
+        candidateCount += 1;
+
+        if (Math.floor(Math.random() * candidateCount) === 0) {
+            selectedWord = word;
+            selectedNormalizedWord = normalizedWord;
+        }
+    }
+
+    if (selectedNormalizedWord.length === 0) {
+        return;
+    }
+
+    recordRevealedWord(
+        gameId,
+        userId,
+        selectedWord,
+        selectedNormalizedWord,
+        occurrenceCounts.get(selectedNormalizedWord) ?? 0,
+    );
 }
