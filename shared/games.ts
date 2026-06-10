@@ -50,8 +50,21 @@ export type LeaderboardRow = {
   averageWinTimeSeconds: number | null
 }
 
+export type ActiveGameSummary = {
+  id: number
+  category: Article['category']
+  revealedWordsCount: number
+  guessesCount: number
+  elapsedSeconds: number
+  startedAt: string
+}
+
 export type GameResponse = {
   game: GameDetail
+}
+
+export type ActiveGamesResponse = {
+  games: ActiveGameSummary[]
 }
 
 export type CompletedGamesResponse = {

@@ -1,9 +1,9 @@
-import { createGameInDatabase, findCompletedGameDetails, findGameDetailById, findLeaderboard, findRevealedWordsByGameId, hasActiveGameAccess, recordRevealedWord, recordTitleGuess, recordWordGuess } from "./gameRepository.js";
+import { createGameInDatabase, findActiveGamesByUserId, findCompletedGameDetails, findGameDetailById, findLeaderboard, findRevealedWordsByGameId, hasActiveGameAccess, recordRevealedWord, recordTitleGuess, recordWordGuess } from "./gameRepository.js";
 import { gameCategories } from "../../../shared/gameCategories.js";
 import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from "./gameErrors.js";
 import type { WikipediaGameResponse, GameData, GameDetailRow, LeaderboardRow } from "./gameTypes.js";
 import type { ArticleParagraph } from "../../../shared/articles.js";
-import type { GameDetail, GuessResponse, TitleGuessResponse } from "../../../shared/games.js";
+import type { ActiveGameSummary, GameDetail, GuessResponse, TitleGuessResponse } from "../../../shared/games.js";
 import { commonWords } from "./commonWords.js";
 
 const RANDOM_IN_CATEGORY_API_URL = 'https://randomincategory.toolforge.org/w/api.php';
@@ -306,6 +306,20 @@ export function getGameDetail(gameId: number, userId?: number): GameDetail {
 
 export function getCompletedGames(): GameDetail[] {
     return findCompletedGameDetails().map(buildGameDetail);
+}
+
+export function getActiveGames(userId: number): ActiveGameSummary[] {
+    return findActiveGamesByUserId(userId).map((game) => ({
+        id: game.id,
+        category: {
+            id: game.category_id,
+            name: game.category_name,
+        },
+        revealedWordsCount: game.revealed_words_count,
+        guessesCount: game.word_guesses_count + game.title_guesses_count,
+        elapsedSeconds: game.elapsed_seconds,
+        startedAt: game.started_at,
+    }));
 }
 
 export function getLeaderboard(): LeaderboardRow[] {

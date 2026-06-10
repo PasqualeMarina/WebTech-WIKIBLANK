@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Response } from 'express';
 import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from './gameErrors.js';
-import { createGame, getCompletedGames, getGameDetail, getLeaderboard, tryTitleGuess, tryWordGuess } from './gameService.js';
+import { createGame, getActiveGames, getCompletedGames, getGameDetail, getLeaderboard, tryTitleGuess, tryWordGuess } from './gameService.js';
 
 export const gameRouter = Router();
 
@@ -100,6 +100,20 @@ gameRouter.get('/completedGames', (_req, res) => {
         res.json({ games: getCompletedGames() });
     } catch (error) {
         console.error('Error loading completed games:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+gameRouter.get('/activeGames', (req, res) => {
+    if (req.session.userId === undefined) {
+        res.status(401).json({ message: 'Unauthorized' });
+        return;
+    }
+
+    try {
+        res.json({ games: getActiveGames(req.session.userId) });
+    } catch (error) {
+        console.error('Error loading active games:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });

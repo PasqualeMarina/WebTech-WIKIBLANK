@@ -3,6 +3,7 @@ import { getApiErrorMessage } from '../api/client'
 import { getCompletedGames } from '../api/games'
 import { GameTablePanel } from '../components/GameTablePanel'
 import { PageHeader } from '../components/PageHeader'
+import { formatDuration } from '../utils/formatDuration'
 import type { GameDetail } from '../../../shared/games'
 import styles from './CompletedGamesPage.module.css'
 
@@ -14,13 +15,6 @@ const completedGamesColumns = [
   'Title guesses',
   'Elapsed time',
 ]
-
-function formatElapsedTime(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`
-}
 
 export function CompletedGamesPage() {
   const [games, setGames] = useState<GameDetail[]>([])
@@ -64,7 +58,7 @@ export function CompletedGamesPage() {
       game.player.username,
       game.wordGuessesCount,
       game.titleGuessesCount,
-      formatElapsedTime(game.elapsedSeconds),
+      formatDuration(game.elapsedSeconds),
     ],
   }))
 

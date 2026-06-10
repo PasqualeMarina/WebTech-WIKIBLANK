@@ -6,6 +6,7 @@ import type {
   TitleGuessResponse,
   CompletedGamesResponse,
   LeaderboardResponse,
+  ActiveGamesResponse,
 } from '../../../shared/games'
 
 export async function createGame(
@@ -42,6 +43,14 @@ export async function guessTitle(
 export async function getCompletedGames(): Promise<CompletedGamesResponse> {
   const response = await apiClient.get<CompletedGamesResponse>(
     '/games/completedGames',
+  )
+
+  return response.data
+}
+
+export async function getActiveGames(): Promise<ActiveGamesResponse> {
+  const response = await apiClient.get<ActiveGamesResponse>(
+    '/games/activeGames',
   )
 
   return response.data

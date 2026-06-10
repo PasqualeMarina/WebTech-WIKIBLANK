@@ -46,6 +46,17 @@ export type GameDetailRow = CreatedGame & {
     username: string;
 };
 
+export type ActiveGameRow = {
+    id: number;
+    category_id: number;
+    category_name: string;
+    revealed_words_count: number;
+    word_guesses_count: number;
+    title_guesses_count: number;
+    elapsed_seconds: number;
+    started_at: string;
+};
+
 export type { LeaderboardRow } from '../../../shared/games.js';
 
 export type RevealedWordRow = {

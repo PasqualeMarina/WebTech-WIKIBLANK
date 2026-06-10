@@ -1,6 +1,6 @@
 import { db } from '../db/database.js';
 import { GameStorageError } from './gameErrors.js';
-import type { CreatedGame, GameData, GameDetailRow, LeaderboardRow, RevealedWordRow } from './gameTypes.js';
+import type { ActiveGameRow, CreatedGame, GameData, GameDetailRow, LeaderboardRow, RevealedWordRow } from './gameTypes.js';
 
 type CategoryRow = {
     id: number;
@@ -86,6 +86,27 @@ const findLeaderboardStatement = db.prepare<[], LeaderboardRow>(`
     FROM users
     LEFT JOIN games ON games.user_id = users.id
     GROUP BY users.id, users.username
+`);
+
+const findActiveGamesByUserIdStatement = db.prepare<[number], ActiveGameRow>(`
+    SELECT
+        games.id,
+        categories.id AS category_id,
+        categories.label AS category_name,
+        games.revealed_words_count,
+        games.word_guesses_count,
+        games.title_guesses_count,
+        MAX(
+            0,
+            CAST(strftime('%s', CURRENT_TIMESTAMP) - strftime('%s', games.started_at) AS INTEGER)
+        ) AS elapsed_seconds,
+        games.started_at
+    FROM games
+    JOIN articles ON articles.id = games.article_id
+    JOIN categories ON categories.id = articles.category_id
+    WHERE games.user_id = ?
+      AND games.status = 'active'
+    ORDER BY games.started_at DESC
 `);
 
 const findRevealedWordsByGameIdStatement = db.prepare<[number], RevealedWordRow>(`
@@ -261,6 +282,10 @@ export function findCompletedGameDetails(): GameDetailRow[] {
 
 export function findLeaderboard(): LeaderboardRow[] {
     return findLeaderboardStatement.all();
+}
+
+export function findActiveGamesByUserId(userId: number): ActiveGameRow[] {
+    return findActiveGamesByUserIdStatement.all(userId);
 }
 
 export function findRevealedWordsByGameId(gameId: number): RevealedWordRow[] {

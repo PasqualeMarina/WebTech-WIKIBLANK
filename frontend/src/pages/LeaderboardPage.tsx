@@ -4,6 +4,7 @@ import { getLeaderboard } from '../api/games'
 import { GameTablePanel } from '../components/GameTablePanel'
 import type { GameTableColumn } from '../components/GameTablePanel'
 import { PageHeader } from '../components/PageHeader'
+import { formatDuration } from '../utils/formatDuration'
 import type { LeaderboardRow } from '../../../shared/games'
 import styles from './LeaderboardPage.module.css'
 
@@ -26,18 +27,6 @@ const defaultSortDirections: Record<SortKey, SortDirection> = {
   totalGamesPlayed: 'descending',
   winPercentage: 'descending',
   averageWinTimeSeconds: 'ascending',
-}
-
-function formatAverageTime(totalSeconds: number | null) {
-  if (totalSeconds === null) {
-    return 'N/A'
-  }
-
-  const roundedSeconds = Math.round(totalSeconds)
-  const minutes = Math.floor(roundedSeconds / 60)
-  const seconds = roundedSeconds % 60
-
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
 export function LeaderboardPage() {
@@ -174,7 +163,9 @@ export function LeaderboardPage() {
       player.gamesWon,
       player.totalGamesPlayed,
       `${player.winPercentage.toFixed(1)}%`,
-      formatAverageTime(player.averageWinTimeSeconds),
+      player.averageWinTimeSeconds === null
+        ? 'N/A'
+        : formatDuration(player.averageWinTimeSeconds),
     ],
   }))
 

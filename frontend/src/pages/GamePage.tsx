@@ -4,15 +4,9 @@ import { getApiErrorMessage } from '../api/client'
 import { getGame, guessTitle, guessWord } from '../api/games'
 import { GameTryPanel } from '../components/GameTryPanel'
 import { PageHeader } from '../components/PageHeader'
+import { formatDuration } from '../utils/formatDuration'
 import type { GameDetail } from '../../../shared/games'
 import styles from './GamePage.module.css'
-
-function formatElapsedTime(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`
-}
 
 function getStatusLabel(status: GameDetail['status']) {
   if (status === 'won') {
@@ -161,7 +155,7 @@ export function GamePage() {
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
               <span>Time</span>
-              <strong>{formatElapsedTime(game.elapsedSeconds)}</strong>
+              <strong>{formatDuration(game.elapsedSeconds)}</strong>
             </div>
             <div className={styles.statCard}>
               <span>Revealed Words</span>
