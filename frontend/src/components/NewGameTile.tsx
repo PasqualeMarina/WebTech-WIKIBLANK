@@ -4,6 +4,8 @@ type NewGameTileProps = {
   title: string
   subtitle?: string
   variant?: 'quick' | 'category'
+  disabled?: boolean
+  isLoading?: boolean
   onClick?: () => void
 }
 
@@ -11,6 +13,8 @@ export function NewGameTile({
   title,
   subtitle,
   variant = 'quick',
+  disabled = false,
+  isLoading = false,
   onClick,
 }: NewGameTileProps) {
   const className = [
@@ -21,7 +25,13 @@ export function NewGameTile({
     .join(' ')
 
   return (
-    <button type="button" className={className} onClick={onClick}>
+    <button
+      type="button"
+      className={className}
+      disabled={disabled}
+      aria-busy={isLoading}
+      onClick={onClick}
+    >
       <span className={styles.title}>{title}</span>
       {subtitle ? <span className={styles.subtitle}>{subtitle}</span> : null}
     </button>

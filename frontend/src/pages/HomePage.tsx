@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CurrentGamesPanel } from '../components/CurrentGamesPanel'
 import { GameCategoryDialog } from '../components/GameCategoryDialog'
@@ -13,15 +13,19 @@ import styles from './HomePage.module.css'
 export function HomePage() {
   const navigate = useNavigate()
   const { currentUser, isLoading } = useAuth()
+  const isCreationLocked = useRef(false)
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     gameCategories[0]?.id ?? '',
   )
-  const [isCreatingGame, setIsCreatingGame] = useState(false)
+  const [creationType, setCreationType] = useState<
+    'quick' | 'category' | null
+  >(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const isCreatingGame = creationType !== null
 
   function handleOpenCategoryDialog() {
-    if (isLoading) {
+    if (isLoading || isCreationLocked.current) {
       return
     }
 
@@ -34,7 +38,7 @@ export function HomePage() {
   }
 
   async function handleStartQuickGame() {
-    if (isLoading || isCreatingGame) {
+    if (isLoading || isCreationLocked.current) {
       return
     }
 
@@ -43,7 +47,8 @@ export function HomePage() {
       return
     }
 
-    setIsCreatingGame(true)
+    isCreationLocked.current = true
+    setCreationType('quick')
     setErrorMessage(null)
 
     try {
@@ -52,16 +57,18 @@ export function HomePage() {
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, 'Could not start game'))
     } finally {
-      setIsCreatingGame(false)
+      isCreationLocked.current = false
+      setCreationType(null)
     }
   }
 
   async function handleStartCategoryGame(categoryId: string) {
-    if (isCreatingGame) {
+    if (isCreationLocked.current) {
       return
     }
 
-    setIsCreatingGame(true)
+    isCreationLocked.current = true
+    setCreationType('category')
     setErrorMessage(null)
 
     try {
@@ -71,7 +78,8 @@ export function HomePage() {
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, 'Could not start game'))
     } finally {
-      setIsCreatingGame(false)
+      isCreationLocked.current = false
+      setCreationType(null)
     }
   }
 
@@ -91,11 +99,19 @@ export function HomePage() {
             title="NEW GAME"
             subtitle="Choose category"
             variant="category"
+            disabled={isLoading || isCreatingGame}
+            isLoading={creationType === 'category'}
             onClick={handleOpenCategoryDialog}
           />
           <NewGameTile
             title="QUICK GAME"
-            subtitle="Casual category"
+            subtitle={
+              creationType === 'quick'
+                ? 'Starting game...'
+                : 'Casual category'
+            }
+            disabled={isLoading || isCreatingGame}
+            isLoading={creationType === 'quick'}
             onClick={handleStartQuickGame}
           />
         </div>
