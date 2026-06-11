@@ -1,106 +1,116 @@
 .loginButton,
 .registerButton,
 .logoutButton {
-  min-height: 42px;
-  border: 1px solid rgba(74, 132, 217, 0.22);
-  border-radius: 8px;
-  padding: 0 18px;
-  background: #fff;
-  color: var(--brand-blue-dark);
-  box-shadow: 0 10px 22px rgba(44, 91, 158, 0.12);
+  min-height: 40px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0 16px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text-secondary);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font: 800 0.82rem/1 var(--sans);
-  letter-spacing: 0;
+  font: 700 0.8rem/1 var(--font-sans);
+  letter-spacing: 0.02em;
   text-decoration: none;
   text-transform: uppercase;
   transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease,
-    transform 0.18s ease;
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
 .loginButton {
-  border-color: rgba(255, 215, 108, 0.55);
-  background:
-    linear-gradient(135deg, rgba(255, 215, 108, 0.62), transparent 46%),
-    linear-gradient(315deg, rgba(74, 132, 217, 0.1), transparent 44%),
-    rgba(255, 255, 255, 0.9);
-  color: var(--brand-blue-dark);
+  border-color: var(--border-accent);
+  background: var(--accent-violet-dim);
+  color: var(--accent-violet);
 }
 
 .authActions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .registerButton {
-  border-color: rgba(27, 76, 148, 0.22);
-  background:
-    linear-gradient(135deg, rgba(255, 215, 108, 0.24), transparent 42%),
-    linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
+  border-color: rgba(6, 182, 212, 0.25);
+  background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
   color: #fff;
-  box-shadow: 0 12px 24px rgba(31, 83, 158, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .loginButton:hover,
-.registerButton:hover,
 .logoutButton:hover {
-  border-color: rgba(74, 132, 217, 0.38);
-  background: rgba(74, 132, 217, 0.09);
+  border-color: var(--border-accent);
+  background: var(--accent-violet-dim);
+  color: var(--text-primary);
   transform: translateY(-1px);
-}
-
-.loginButton:hover {
-  border-color: rgba(255, 215, 108, 0.72);
-  background:
-    linear-gradient(135deg, rgba(255, 215, 108, 0.72), transparent 46%),
-    linear-gradient(315deg, rgba(74, 132, 217, 0.14), transparent 44%),
-    rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-glow-violet);
 }
 
 .registerButton:hover {
-  background:
-    linear-gradient(135deg, rgba(255, 215, 108, 0.24), transparent 42%),
-    linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
+  transform: translateY(-1px);
+  box-shadow:
+    var(--shadow-sm),
+    var(--shadow-glow-violet);
 }
 
 .loginButton:focus-visible,
 .registerButton:focus-visible,
 .logoutButton:focus-visible {
-  outline: 3px solid rgba(255, 210, 94, 0.85);
-  outline-offset: 3px;
+  outline: 2px solid var(--accent-violet);
+  outline-offset: 2px;
 }
 
 .userStatus {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .userName {
   min-width: 0;
-  min-height: 42px;
-  border: 1px solid rgba(74, 132, 217, 0.22);
-  border-radius: 8px;
-  padding: 0 18px;
-  background:
-    linear-gradient(135deg, rgba(255, 215, 108, 0.22), transparent 42%),
-    rgba(255, 255, 255, 0.9);
-  color: var(--brand-blue-dark);
-  box-shadow: 0 10px 22px rgba(44, 91, 158, 0.12);
+  min-height: 40px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0 14px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text-primary);
   display: inline-flex;
   align-items: center;
-  font: 800 0.82rem/1 var(--sans);
-  letter-spacing: 0;
+  gap: 8px;
+  font: 700 0.82rem/1 var(--font-sans);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
+  transition: filter 0.3s ease;
+}
+
+.userName:hover {
+  filter: drop-shadow(0 4px 24px rgba(139, 92, 246, 0.35));
+}
+
+.userAvatar {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 @media (max-width: 520px) {

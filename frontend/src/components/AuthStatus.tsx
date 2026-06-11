@@ -31,7 +31,12 @@ export function AuthStatus() {
 
   return (
     <div className={styles.userStatus} aria-label="Signed in user">
-      <span className={styles.userName}>{currentUser.username}</span>
+      <span className={styles.userName}>
+        <span className={styles.userAvatar} aria-hidden="true">
+          {currentUser.username.charAt(0).toUpperCase()}
+        </span>
+        {currentUser.username}
+      </span>
       <button
         type="button"
         className={styles.logoutButton}

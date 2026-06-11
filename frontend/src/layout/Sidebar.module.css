@@ -1,64 +1,93 @@
 .sidebar {
+  position: sticky;
+  top: 16px;
   align-self: start;
-  min-height: auto;
-  margin: 24px;
-  padding: 22px;
-  background:
-    linear-gradient(135deg, rgba(255, 215, 108, 0.24), transparent 38%),
-    linear-gradient(315deg, rgba(74, 132, 217, 0.2), transparent 44%),
-    rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(74, 132, 217, 0.18);
-  border-radius: 8px;
-  box-shadow: 0 18px 40px rgba(44, 91, 158, 0.16);
+  max-height: 100svh;
+  margin: 48px 16px 16px;
+  padding: 20px;
+  background: var(--bg-glass-strong);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   box-sizing: border-box;
   overflow: hidden;
+  animation: fadeIn 0.4s ease;
 }
 
 .brand {
-  min-height: 150px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 10px 6px 18px;
+  padding: 12px 6px 8px;
+  gap: 12px;
 }
 
 .brand img {
-  width: 240px;
+  width: 200px;
   max-width: 100%;
   height: auto;
   display: block;
-  filter: drop-shadow(0 10px 18px rgba(44, 91, 158, 0.14));
+  filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
+  transition: filter 0.3s ease;
+}
+
+.brand img:hover {
+  filter: drop-shadow(0 4px 24px rgba(139, 92, 246, 0.35));
+}
+
+.brandAccent {
+  width: 90%;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    var(--accent-violet),
+    var(--accent-cyan),
+    var(--accent-amber),
+    var(--accent-cyan),
+    var(--accent-violet)
+  );
+  background-size: 200% 100%;
+  opacity: 0.85;
+  animation: shimmerLine 3s linear infinite;
+  box-shadow:
+    0 0 6px rgba(139, 92, 246, 0.4),
+    0 0 12px rgba(6, 182, 212, 0.25);
+}
+
+@keyframes shimmerLine {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
 }
 
 .sidebarNav {
-  padding-top: 2px;
+  padding-top: 4px;
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 @media (max-width: 820px) {
   .sidebar {
-    min-height: auto;
-    margin: 18px;
-    padding: 18px;
-    gap: 14px;
+    margin: 14px;
+    padding: 16px;
+    gap: 12px;
   }
 
   .brand {
-    min-height: auto;
-    justify-content: center;
-    padding: 14px;
+    padding: 10px;
   }
 
   .brand img {
-    width: 178px;
+    width: 160px;
   }
 
   .sidebarNav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

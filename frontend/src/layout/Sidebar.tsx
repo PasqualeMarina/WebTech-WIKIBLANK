@@ -7,6 +7,7 @@ export function Sidebar() {
     <aside className={styles.sidebar} aria-label="Main navigation">
       <div className={styles.brand}>
         <img src="/wikiBlankLOGO.png" alt="WikiBlankLogo" />
+        <div className={styles.brandAccent} aria-hidden="true" />
       </div>
 
       <nav className={styles.sidebarNav}>
@@ -15,6 +16,7 @@ export function Sidebar() {
             key={item.id}
             label={item.label}
             path={item.path}
+            icon={item.icon}
           />
         ))}
       </nav>

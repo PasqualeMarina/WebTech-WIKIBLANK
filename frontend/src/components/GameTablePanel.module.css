@@ -1,37 +1,34 @@
 .gamePanel {
   min-height: 354px;
-  border: 1px solid rgba(74, 132, 217, 0.18);
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(255, 215, 108, 0.2), transparent 34%),
-    linear-gradient(315deg, rgba(74, 132, 217, 0.16), transparent 38%),
-    rgba(255, 255, 255, 0.92);
-  box-shadow: 0 18px 40px rgba(44, 91, 158, 0.16);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-glass-strong);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-md);
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
+  animation: slideUp 0.45s ease;
 }
 
 .panelHeading {
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(74, 132, 217, 0.2);
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border-subtle);
   background:
-    linear-gradient(135deg, rgba(74, 132, 217, 0.16), transparent 46%),
-    linear-gradient(315deg, rgba(255, 215, 108, 0.18), transparent 42%),
-    rgba(255, 255, 255, 0.72);
+    linear-gradient(135deg, var(--accent-violet-dim), transparent 50%),
+    rgba(22, 27, 46, 0.5);
 }
 
 .panelHeading h2 {
   margin: 0;
-  color: var(--brand-blue-dark);
-  font-size: 1.2rem;
-  font-weight: 850;
-  line-height: 1.2;
-  letter-spacing: 0;
+  color: var(--text-primary);
+  font: 800 1.15rem/1.2 var(--font-display);
+  letter-spacing: -0.01em;
 }
 
 .gamesTableWrap {
-  padding: 18px;
+  padding: 14px;
   overflow-x: auto;
 }
 
@@ -39,7 +36,7 @@
   width: 100%;
   min-width: 560px;
   border-collapse: separate;
-  border-spacing: 0 10px;
+  border-spacing: 0 8px;
   background: transparent;
 }
 
@@ -50,22 +47,23 @@
 }
 
 .gamesTable th {
-  padding: 0 14px 2px;
-  color: var(--brand-blue-dark);
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0;
+  padding: 0 14px 4px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .gamesTable th::after {
   content: '';
   display: block;
-  width: 34px;
-  height: 4px;
-  margin-top: 7px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--brand-yellow), var(--brand-blue));
+  width: 28px;
+  height: 3px;
+  margin-top: 6px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+  opacity: 0.5;
 }
 
 .sortButton {
@@ -77,60 +75,73 @@
   background: none;
   border: 0;
   cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sortButton:hover {
+  color: var(--text-primary);
 }
 
 .sortButton::after {
   content: '';
   display: inline-block;
-  margin-left: 7px;
+  margin-left: 6px;
   border-right: 4px solid transparent;
-  border-bottom: 6px solid currentColor;
+  border-bottom: 5px solid currentColor;
   border-left: 4px solid transparent;
-  opacity: 0.35;
+  opacity: 0.3;
   transform: translateY(-1px) rotate(180deg);
+  transition: opacity 0.2s ease;
 }
 
 .sortButton[data-direction='ascending']::after {
   opacity: 1;
   transform: translateY(-1px);
+  color: var(--accent-violet);
 }
 
 .sortButton[data-direction='descending']::after {
   opacity: 1;
+  color: var(--accent-violet);
 }
 
 .sortButton:focus-visible {
   border-radius: 3px;
-  outline: 2px solid var(--brand-blue);
+  outline: 2px solid var(--accent-violet);
   outline-offset: 4px;
 }
 
 .gamesTable td {
-  padding: 18px 16px;
-  color: var(--brand-blue-dark);
-  font-size: 0.95rem;
+  padding: 14px 14px;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 500;
   background: transparent;
-  border-top: 1px solid rgba(74, 132, 217, 0.16);
-  border-bottom: 1px solid rgba(74, 132, 217, 0.16);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .gamesTable tbody tr:not(:has(.emptyTableCell)) {
-  background: linear-gradient(
-    100deg,
-    rgba(255, 215, 108, 0.3) 0%,
-    rgba(239, 246, 255, 0.94) 46%,
-    rgba(74, 132, 217, 0.22) 100%
-  );
+  background:
+    linear-gradient(
+      100deg,
+      rgba(139, 92, 246, 0.06) 0%,
+      rgba(22, 27, 46, 0.5) 50%,
+      rgba(6, 182, 212, 0.06) 100%
+    );
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .gamesTable td:first-child {
-  border-left: 1px solid rgba(74, 132, 217, 0.16);
-  border-radius: 8px 0 0 8px;
+  border-left: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
 }
 
 .gamesTable td:last-child {
-  border-right: 1px solid rgba(74, 132, 217, 0.16);
-  border-radius: 0 8px 8px 0;
+  border-right: 1px solid var(--border-subtle);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
 .clickableRow {
@@ -139,31 +150,25 @@
 
 .clickableRow td {
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.gamesTable tbody .clickableRow {
-  transition:
-    background 160ms ease,
-    filter 160ms ease;
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .gamesTable tbody .clickableRow:hover,
 .gamesTable tbody .clickableRow:focus-visible {
-  background: linear-gradient(
-    100deg,
-    rgba(255, 215, 108, 0.54) 0%,
-    rgba(229, 241, 255, 0.98) 46%,
-    rgba(74, 132, 217, 0.4) 100%
-  );
-  filter: saturate(1.12);
+  background:
+    linear-gradient(
+      100deg,
+      rgba(139, 92, 246, 0.12) 0%,
+      rgba(28, 34, 64, 0.7) 50%,
+      rgba(6, 182, 212, 0.12) 100%
+    );
 }
 
 .clickableRow:hover td,
 .clickableRow:focus-visible td {
-  border-color: rgba(74, 132, 217, 0.46);
-  box-shadow: 0 8px 22px rgba(44, 91, 158, 0.14);
+  border-color: var(--border-accent);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.1);
 }
 
 .clickableRow:focus-visible {
@@ -172,14 +177,11 @@
 
 .gamesTable .emptyTableCell {
   height: 168px;
-  color: var(--brand-blue-dark);
-  background:
-    linear-gradient(135deg, rgba(255, 215, 108, 0.28), transparent 46%),
-    linear-gradient(315deg, rgba(74, 132, 217, 0.16), transparent 44%),
-    rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(74, 132, 217, 0.18);
-  border-radius: 8px;
-  font-weight: 700;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
   text-align: center;
   vertical-align: middle;
 }
@@ -187,24 +189,24 @@
 .emptyGameState {
   display: grid;
   justify-items: center;
-  gap: 18px;
+  gap: 16px;
 }
 
 .emptyGameState > span {
-  font-size: 1.05rem;
+  font-size: 1rem;
 }
 
 .emptyGameLines {
-  width: min(320px, 100%);
+  width: min(280px, 100%);
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .emptyGameLines span {
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--brand-blue), var(--brand-yellow));
-  opacity: 0.72;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+  opacity: 0.25;
 }
 
 .emptyGameLines span:nth-child(2) {

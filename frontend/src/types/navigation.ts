@@ -7,22 +7,26 @@ export type NavigationItem = {
   id: NavigationItemId
   label: string
   path: string
+  icon: string
 }
 
 export const navigationItems: NavigationItem[] = [
   {
     id: 'home',
-    label: 'HOME',
+    label: 'Home',
     path: '/home',
+    icon: 'home',
   },
   {
     id: 'leaderboard',
-    label: 'LEADERBOARD',
+    label: 'Leaderboard',
     path: '/leaderboard',
+    icon: 'trophy',
   },
   {
     id: 'completed-games',
-    label: 'COMPLETED GAMES',
+    label: 'Completed Games',
     path: '/completed-games',
+    icon: 'history',
   },
 ]
