@@ -7,7 +7,7 @@ export const GAME_DIFFICULTIES = [
 
 export type GameDifficulty = (typeof GAME_DIFFICULTIES)[number]
 
-export const DEFAULT_GAME_DIFFICULTY: GameDifficulty = 'medium'
+export const DEFAULT_GAME_DIFFICULTY: GameDifficulty = 'easy'
 
 export const gameDifficultyOptions: Array<{
   id: GameDifficulty
