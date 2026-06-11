@@ -4,6 +4,7 @@ import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, 
 import { createGame, getActiveGames, getCompletedGames, getGameDetail, getLeaderboard, tryTitleGuess, tryWordGuess } from './gameService.js';
 import { isGameDifficulty } from '../../../shared/gameDifficulties.js';
 import type { GameDifficulty } from '../../../shared/gameDifficulties.js';
+import { requireAuth } from '../auth/authMiddleware.js';
 
 export const gameRouter = Router();
 
@@ -92,13 +93,8 @@ function getGuessedTitle(body: unknown): string | null {
     return guessedTitle.trim();
 }
 
-gameRouter.post('/', async (req, res) => {
-    if (req.session.userId === undefined) {
-        res.status(401).json({ message: 'Unauthorized' });
-        return;
-    }
-
-    const userId = req.session.userId;
+gameRouter.post('/', requireAuth, async (req, res) => {
+    const userId = req.auth!.userId;
     const category = getRequestedCategory(req.body);
     const difficulty = getRequestedDifficulty(req.body);
 
@@ -129,14 +125,9 @@ gameRouter.get('/completedGames', (_req, res) => {
     }
 });
 
-gameRouter.get('/activeGames', (req, res) => {
-    if (req.session.userId === undefined) {
-        res.status(401).json({ message: 'Unauthorized' });
-        return;
-    }
-
+gameRouter.get('/activeGames', requireAuth, (req, res) => {
     try {
-        res.json({ games: getActiveGames(req.session.userId) });
+        res.json({ games: getActiveGames(req.auth!.userId) });
     } catch (error) {
         console.error('Error loading active games:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -161,7 +152,7 @@ gameRouter.get('/:gameId', (req, res) => {
     }
 
     try {
-        const game = getGameDetail(gameId, req.session.userId);
+        const game = getGameDetail(gameId, req.auth?.userId);
         res.json({ game });
     } catch (error) {
         if (error instanceof GameNotFoundError || error instanceof GameAccessDeniedError) {
@@ -174,13 +165,8 @@ gameRouter.get('/:gameId', (req, res) => {
     }
 });
 
-gameRouter.post('/:gameId/guessWord', (req, res) => {
-    if(req.session.userId === undefined) {
-        res.status(401).json({ message: 'Unauthorized' });
-        return;
-    }
-
-    const userId = req.session.userId;
+gameRouter.post('/:gameId/guessWord', requireAuth, (req, res) => {
+    const userId = req.auth!.userId;
     const gameId = Number(req.params.gameId);
 
     if (!Number.isInteger(gameId) || gameId <= 0) {
@@ -208,13 +194,8 @@ gameRouter.post('/:gameId/guessWord', (req, res) => {
     }
 });
 
-gameRouter.post('/:gameId/guessTitle', (req, res) => {
-    if(req.session.userId === undefined) {
-        res.status(401).json({ message: 'Unauthorized' });
-        return;
-    }
-
-    const userId = req.session.userId;
+gameRouter.post('/:gameId/guessTitle', requireAuth, (req, res) => {
+    const userId = req.auth!.userId;
     const gameId = Number(req.params.gameId);
 
     if (!Number.isInteger(gameId) || gameId <= 0) {

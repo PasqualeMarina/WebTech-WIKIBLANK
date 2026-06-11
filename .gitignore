@@ -17,6 +17,8 @@ data
 *.local
 .env
 .env.*
+!.env.example
+GEMINI.md
 
 # Editor directories and files
 .vscode/*

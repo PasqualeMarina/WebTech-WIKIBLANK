@@ -2,6 +2,13 @@ import { Router } from 'express';
 import { InvalidCredentialsError, UserAlreadyExistsError } from './userErrors.js';
 import { getAuthenticatedUser, loginUser, registerUser } from './userService.js';
 import { isValidLoginRequest, isValidRegisterRequest } from './userValidators.js';
+import { requireAuth } from '../auth/authMiddleware.js';
+import {
+  AUTH_COOKIE_NAME,
+  authCookieOptions,
+  clearAuthCookieOptions,
+  createAuthToken,
+} from '../auth/jwtService.js';
 
 export const userRouter = Router();
 
@@ -36,7 +43,9 @@ userRouter.post('/login', (req, res) => {
 
   try {
     const user = loginUser(loginData.username, loginData.password);
-    req.session.userId = user.id;
+    const token = createAuthToken(user.id);
+
+    res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
     res.json({ message: 'User logged in successfully', user });
   } catch (error) {
     if (error instanceof InvalidCredentialsError) {
@@ -48,15 +57,11 @@ userRouter.post('/login', (req, res) => {
   }
 });
 
-userRouter.get('/me', (req, res) => {
-  if (req.session.userId === undefined) {
-    res.status(401).json({ message: 'Unauthorized' });
-    return;
-  }
-
-  const user = getAuthenticatedUser(req.session.userId);
+userRouter.get('/me', requireAuth, (req, res) => {
+  const user = getAuthenticatedUser(req.auth!.userId);
 
   if (!user) {
+    res.clearCookie(AUTH_COOKIE_NAME, clearAuthCookieOptions);
     res.status(401).json({ message: 'Unauthorized' });
     return;
   }
@@ -65,13 +70,6 @@ userRouter.get('/me', (req, res) => {
 });
 
 userRouter.post('/logout', (req, res) => {
-  req.session.destroy((error) => {
-    if (error) {
-      res.status(500).json({ message: 'Internal server error' });
-      return;
-    }
-
-    res.clearCookie('wikblank.sid');
-    res.json({ message: 'User logged out successfully' });
-  });
+  res.clearCookie(AUTH_COOKIE_NAME, clearAuthCookieOptions);
+  res.json({ message: 'User logged out successfully' });
 });
