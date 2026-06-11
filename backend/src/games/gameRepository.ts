@@ -10,6 +10,10 @@ type ArticleRow = {
     id: number;
 };
 
+type ArticleVersionRow = ArticleRow & {
+    content: string;
+};
+
 type ArticleTitleRow = {
     title: string;
 };
@@ -24,10 +28,11 @@ const findCategoryBySlugStatement = db.prepare<[string], CategoryRow>(`
     WHERE slug = ?
 `);
 
-const findArticleBySourceUrlStatement = db.prepare<[string], ArticleRow>(`
-    SELECT id
+const findArticleVersionsBySourceUrlStatement = db.prepare<[string], ArticleVersionRow>(`
+    SELECT id, content
     FROM articles
     WHERE source_url = ?
+    ORDER BY id DESC
 `);
 
 const findActiveArticleTitlesByUserIdStatement = db.prepare<[number], ArticleTitleRow>(`
@@ -218,21 +223,6 @@ const createArticleStatement = db.prepare<{
     RETURNING id
 `);
 
-const updateArticleStatement = db.prepare<{
-    id: number;
-    categoryId: number;
-    title: string;
-    content: string;
-    thumbnailUrl: string | null;
-}>(`
-    UPDATE articles
-    SET category_id = @categoryId,
-        title = @title,
-        content = @content,
-        thumbnail_url = @thumbnailUrl
-    WHERE id = @id
-`);
-
 const createGameStatement = db.prepare<{
     userId: number;
     articleId: number;
@@ -252,6 +242,14 @@ const createGameStatement = db.prepare<{
         elapsed_seconds
 `);
 
+function normalizeArticleContent(content: string): string {
+    return content
+        .normalize('NFKC')
+        .toLocaleLowerCase('en-US')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 const createGameTransaction = db.transaction((gameData: GameData): CreatedGame => {
     const category = findCategoryBySlugStatement.get(gameData.categoryId);
 
@@ -269,18 +267,16 @@ const createGameTransaction = db.transaction((gameData: GameData): CreatedGame =
         throw new ActiveArticleConflictError();
     }
 
-    const existingArticle = findArticleBySourceUrlStatement.get(gameData.articleUrl);
+    const normalizedDescription = normalizeArticleContent(gameData.description);
+    const existingArticle = findArticleVersionsBySourceUrlStatement
+        .all(gameData.articleUrl)
+        .find(
+            (article) =>
+                normalizeArticleContent(article.content) === normalizedDescription,
+        );
     let articleId = existingArticle?.id;
 
-    if (articleId) {
-        updateArticleStatement.run({
-            id: articleId,
-            categoryId: category.id,
-            title: gameData.title,
-            content: gameData.description,
-            thumbnailUrl: gameData.thumbnailUrl,
-        });
-    } else {
+    if (!articleId) {
         articleId = createArticleStatement.get({
             categoryId: category.id,
             title: gameData.title,
