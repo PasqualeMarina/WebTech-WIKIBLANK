@@ -15,7 +15,6 @@ export function Sidebar() {
             key={item.id}
             label={item.label}
             path={item.path}
-            isEnabled={item.isEnabled}
           />
         ))}
       </nav>

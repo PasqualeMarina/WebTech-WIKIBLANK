@@ -4,7 +4,6 @@ import { getApiErrorMessage } from '../api/client'
 import { getGame, guessTitle, guessWord } from '../api/games'
 import { GameTryPanel } from '../components/GameTryPanel'
 import { PageHeader } from '../components/PageHeader'
-import { formatDuration } from '../utils/formatDuration'
 import type { GameDetail } from '../../../shared/games'
 import styles from './GamePage.module.css'
 
@@ -22,6 +21,12 @@ export function GamePage() {
   const [isLoading, setIsLoading] = useState(() => Boolean(gameId))
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const visibleErrorMessage = gameId ? errorMessage : 'Game not found'
+  const hiddenWordsCount =
+    game?.article.paragraphs.reduce(
+      (total, paragraph) =>
+        total + paragraph.filter((word) => !word.revealed).length,
+      0,
+    ) ?? 0
 
   useEffect(() => {
     let isMounted = true
@@ -106,22 +111,54 @@ export function GamePage() {
       <div className={styles.gameLayout}>
         <article className={styles.articlePanel} aria-labelledby="article-title">
           <div className={styles.panelHeading}>
-            <div>
-              <p className={styles.panelEyebrow}>{game.article.category.name}</p>
+            <div className={styles.panelMeta}>
+              <span className={styles.categoryBadge}>
+                {game.article.category.name}
+              </span>
+              <span
+                className={[
+                  styles.statusBadge,
+                  game.status === 'won' ? styles.wonStatus : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {getStatusLabel(game.status)}
+              </span>
+            </div>
+
+            <div className={styles.titleBlock}>
+              <p className={styles.titleLabel}>
+                {game.status === 'won' ? 'Article title' : 'Hidden article title'}
+              </p>
               <h2 id="article-title">
-                {game.article.title ?? 'Hidden article'}
+                {game.article.title ?? (
+                  <span
+                    className={styles.hiddenTitle}
+                    aria-label={`Hidden title with ${game.article.titleWordLengths.length} ${
+                      game.article.titleWordLengths.length === 1
+                        ? 'word'
+                        : 'words'
+                    }: ${game.article.titleWordLengths.join(', ')} characters`}
+                  >
+                    {game.article.titleWordLengths.map((wordLength, wordIndex) => (
+                      <span
+                        key={`${wordLength}-${wordIndex}`}
+                        className={styles.hiddenTitleWord}
+                        aria-hidden="true"
+                      >
+                        {Array.from({ length: wordLength }, (_, letterIndex) => (
+                          <span
+                            key={letterIndex}
+                            className={styles.hiddenTitleLetter}
+                          />
+                        ))}
+                      </span>
+                    ))}
+                  </span>
+                )}
               </h2>
             </div>
-            <span
-              className={[
-                styles.statusBadge,
-                game.status === 'won' ? styles.wonStatus : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {getStatusLabel(game.status)}
-            </span>
           </div>
 
           <div className={styles.articleBody}>
@@ -152,29 +189,41 @@ export function GamePage() {
         </article>
 
         <aside className={styles.sidePanel} aria-label="Game controls">
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <span>Time</span>
-              <strong>{formatDuration(game.elapsedSeconds)}</strong>
+          <header className={styles.sidePanelHeading}>
+            <p>Game controls</p>
+            <h2>
+              {game.status === 'won' ? 'Game summary' : 'Solve the article'}
+            </h2>
+          </header>
+
+          <section
+            className={styles.progressPanel}
+            aria-labelledby="game-progress-title"
+          >
+            <h3 id="game-progress-title">Progress</h3>
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <span>Hidden words remaining</span>
+                <strong>{hiddenWordsCount}</strong>
+              </div>
+              <div className={styles.statCard}>
+                <span>Revealed words</span>
+                <strong>{game.revealedWordsCount}</strong>
+              </div>
+              <div className={styles.statCard}>
+                <span>Word guesses</span>
+                <strong>{game.wordGuessesCount}</strong>
+              </div>
+              <div className={styles.statCard}>
+                <span>Title guesses</span>
+                <strong>{game.titleGuessesCount}</strong>
+              </div>
             </div>
-            <div className={styles.statCard}>
-              <span>Revealed Words</span>
-              <strong>{game.revealedWordsCount}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span>Word guesses</span>
-              <strong>{game.wordGuessesCount}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span>Title guesses</span>
-              <strong>{game.titleGuessesCount}</strong>
-            </div>
-          </div>
+          </section>
 
           <GameTryPanel
             status={game.status}
             playerName={game.player.username}
-            currentTitleGuess={game.currentTitleGuess}
             endedAt={game.endedAt}
             onGuessWord={handleGuessWord}
             onGuessTitle={handleGuessTitle}

@@ -1,4 +1,5 @@
 import type { Article } from './articles.js'
+import type { GameDifficulty } from './gameDifficulties.js'
 import type { AuthUser } from './users.js'
 
 export const GAME_STATUSES = ['active', 'won'] as const
@@ -10,7 +11,6 @@ export type GameDetail = {
   status: GameStatus
   article: Article
   player: AuthUser
-  currentTitleGuess: string | null
   revealedWordsCount: number
   wordGuessesCount: number
   titleGuessesCount: number
@@ -21,6 +21,7 @@ export type GameDetail = {
 
 export type StartGameRequest = {
   category?: string
+  difficulty?: GameDifficulty
 }
 
 export type WordGuessRequest = {

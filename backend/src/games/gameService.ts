@@ -1,26 +1,137 @@
-import { createGameInDatabase, findActiveGamesByUserId, findCompletedGameDetails, findGameDetailById, findLeaderboard, findRevealedWordsByGameId, hasActiveGameAccess, recordRevealedWord, recordTitleGuess, recordWordGuess } from "./gameRepository.js";
+import { createGameInDatabase, findActiveArticleTitlesByUserId, findActiveGamesByUserId, findCompletedGameDetails, findGameDetailById, findLeaderboard, findRevealedWordsByGameId, hasActiveGameAccess, recordTitleGuess, recordWordGuess } from "./gameRepository.js";
 import { gameCategories } from "../../../shared/gameCategories.js";
-import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from "./gameErrors.js";
-import type { WikipediaGameResponse, GameData, GameDetailRow, LeaderboardRow } from "./gameTypes.js";
+import { ActiveArticleConflictError, GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError, InvalidGameDifficultyError } from "./gameErrors.js";
+import type { WikipediaCategoryMembersResponse, WikipediaSummaryResponse, GameData, GameDetailRow, InitialRevealedWord, LeaderboardRow } from "./gameTypes.js";
 import type { ArticleParagraph } from "../../../shared/articles.js";
 import type { ActiveGameSummary, GameDetail, GuessResponse, TitleGuessResponse } from "../../../shared/games.js";
+import { DEFAULT_GAME_DIFFICULTY, isGameDifficulty } from "../../../shared/gameDifficulties.js";
+import type { GameDifficulty } from "../../../shared/gameDifficulties.js";
 import { commonWords } from "./commonWords.js";
 
-const RANDOM_IN_CATEGORY_API_URL = 'https://randomincategory.toolforge.org/w/api.php';
-const WIKIPEDIA_SITE = 'en.wikipedia.org';
-const MAX_RANDOM_ARTICLE_ATTEMPTS = 30;
-const MAX_SUITABLE_ARTICLE_ATTEMPTS = 10;
+const WIKIPEDIA_API_URL = 'https://en.wikipedia.org/w/api.php';
+const WIKIPEDIA_REST_API_URL = 'https://en.wikipedia.org/api/rest_v1/page/summary/';
+const MAX_CATEGORY_MEMBERS = 500;
+const MAX_SUITABLE_ARTICLE_ATTEMPTS = 20;
 const MAX_WIKIPEDIA_REQUEST_ATTEMPTS = 3;
 const MAX_RETRY_DELAY_MS = 30_000;
-const MIN_ARTICLE_SIZE_BYTES = 1_000;
-const MAX_ARTICLE_SIZE_BYTES = 15_000;
-const WIKIPEDIA_API_URL = 'https://en.wikipedia.org/w/api.php';
+const EXTERNAL_REQUEST_TIMEOUT_MS = 10_000;
+const MIN_ARTICLE_WORDS = 30;
+const MAX_ARTICLE_WORDS = 200;
+const MAX_ARTICLE_CONTENT_BYTES = 15_000;
 const EXTERNAL_REQUEST_HEADERS = {
     'User-Agent': 'WikiBlank/1.0 (educational web application)',
 };
 
+const DIFFICULTY_REVEAL_PERCENTAGES: Record<GameDifficulty, number> = {
+    hard: 0.15,
+    medium: 0.3,
+    easy: 0.5,
+    very_easy: 0.7,
+};
+
 function normalizeWord(word: string): string {
     return word.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+}
+
+function getDifficulty(difficulty: string | undefined): GameDifficulty {
+    if (difficulty === undefined) {
+        return DEFAULT_GAME_DIFFICULTY;
+    }
+
+    if (!isGameDifficulty(difficulty)) {
+        throw new InvalidGameDifficultyError(difficulty);
+    }
+
+    return difficulty;
+}
+
+function getTitleWordLengths(title: string): number[] {
+    return title
+        .trim()
+        .split(/\s+/)
+        .map((word) => word.match(/[\p{L}\p{N}]/gu)?.length ?? 0)
+        .filter((wordLength) => wordLength > 0);
+}
+
+function getProtectedTitleWords(title: string): Set<string> {
+    const protectedWords = new Set<string>();
+    const normalizedTitle = normalizeWord(title);
+
+    if (normalizedTitle.length > 0) {
+        protectedWords.add(normalizedTitle);
+    }
+
+    for (const titlePart of title.match(/[\p{L}\p{N}]+/gu) ?? []) {
+        const normalizedTitlePart = normalizeWord(titlePart);
+
+        if (normalizedTitlePart.length > 0) {
+            protectedWords.add(normalizedTitlePart);
+        }
+    }
+
+    for (const titleWord of title.split(/\s+/)) {
+        const normalizedTitleWord = normalizeWord(titleWord);
+
+        if (normalizedTitleWord.length > 0) {
+            protectedWords.add(normalizedTitleWord);
+        }
+    }
+
+    return protectedWords;
+}
+
+function shuffle<T>(values: T[]): T[] {
+    const shuffledValues = [...values];
+
+    for (let index = shuffledValues.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [shuffledValues[index], shuffledValues[randomIndex]] = [
+            shuffledValues[randomIndex],
+            shuffledValues[index],
+        ];
+    }
+
+    return shuffledValues;
+}
+
+function getInitialRevealedWords(
+    content: string,
+    title: string,
+    difficulty: GameDifficulty,
+): InitialRevealedWord[] {
+    const protectedTitleWords = getProtectedTitleWords(title);
+    const candidates = new Map<string, InitialRevealedWord>();
+
+    for (const word of content.split(/\s+/)) {
+        const normalizedWord = normalizeWord(word);
+
+        if (
+            normalizedWord.length === 0
+            || commonWords.has(normalizedWord)
+            || protectedTitleWords.has(normalizedWord)
+        ) {
+            continue;
+        }
+
+        const existingCandidate = candidates.get(normalizedWord);
+
+        if (existingCandidate) {
+            existingCandidate.occurrenceCount += 1;
+            continue;
+        }
+
+        candidates.set(normalizedWord, {
+            word,
+            normalizedWord,
+            occurrenceCount: 1,
+        });
+    }
+
+    const revealCount = Math.round(
+        candidates.size * DIFFICULTY_REVEAL_PERCENTAGES[difficulty],
+    );
+
+    return shuffle([...candidates.values()]).slice(0, revealCount);
 }
 
 function getRandomCategory() {
@@ -42,63 +153,33 @@ function getCategory(categoryId: string) {
     return category;
 }
 
-function buildRandomArticleRequestUrl(category: string): string {
-    const url = new URL(RANDOM_IN_CATEGORY_API_URL);
-
-    url.searchParams.set('site', WIKIPEDIA_SITE);
-    url.searchParams.set('category', category);
-
-    return url.toString();
-}
-
-function isArticleUrl(articleUrl: string): boolean {
-    const parsedArticleUrl = new URL(articleUrl);
-    const title = parsedArticleUrl.searchParams.get('title');
-    const articlePath = title ?? decodeURIComponent(parsedArticleUrl.pathname);
-
-    return !articlePath.includes(':');
-}
-
-function getArticleTitle(articleUrl: string): string {
-    const parsedArticleUrl = new URL(articleUrl);
-    const titleParam = parsedArticleUrl.searchParams.get('title');
-    const titlePath = parsedArticleUrl.pathname.startsWith('/wiki/')
-        ? parsedArticleUrl.pathname.slice('/wiki/'.length)
-        : parsedArticleUrl.pathname.slice(1);
-    const title = (titleParam ?? decodeURIComponent(titlePath)).replaceAll('_', ' ');
-
-    if (!/[ÃÂ]/.test(title)) {
-        return title;
-    }
-
-    const repairedTitle = Buffer.from(title, 'latin1').toString('utf8');
-    return repairedTitle.includes('\uFFFD') ? title : repairedTitle;
-}
-
-function buildArticleRequestUrl(title: string): string {
+function buildCategoryMembersRequestUrl(category: string): string {
     const url = new URL(WIKIPEDIA_API_URL);
 
     url.search = new URLSearchParams({
         action: 'query',
-        prop: 'extracts|pageimages|info',
-        titles: title,
-        exintro: '1',
-        explaintext: '1',
-        piprop: 'thumbnail',
-        pithumbsize: '600',
-        redirects: '1',
+        list: 'categorymembers',
+        cmtitle: `Category:${category}`,
+        cmlimit: String(MAX_CATEGORY_MEMBERS),
+        cmnamespace: '0',
         format: 'json',
-        formatversion: '2',
+        origin: '*',
     }).toString();
 
     return url.toString();
 }
 
-function isArticleSizeAllowed(articleSize: number | undefined): boolean {
+function buildArticleSummaryRequestUrl(title: string): string {
+    return `${WIKIPEDIA_REST_API_URL}${encodeURIComponent(title)}`;
+}
+
+function isArticleLengthAllowed(content: string): boolean {
+    const wordCount = content.match(/[\p{L}\p{N}]+/gu)?.length ?? 0;
+
     return (
-        articleSize !== undefined &&
-        articleSize >= MIN_ARTICLE_SIZE_BYTES &&
-        articleSize <= MAX_ARTICLE_SIZE_BYTES
+        wordCount >= MIN_ARTICLE_WORDS
+        && wordCount <= MAX_ARTICLE_WORDS
+        && Buffer.byteLength(content, 'utf8') <= MAX_ARTICLE_CONTENT_BYTES
     );
 }
 
@@ -118,13 +199,14 @@ function getRetryDelayMs(response: Response, attempt: number): number {
     return attempt * 1000;
 }
 
-async function getWikipediaArticle(title: string): Promise<Response> {
+async function getWikipediaResponse(url: string): Promise<Response> {
     for (let attempt = 1; attempt <= MAX_WIKIPEDIA_REQUEST_ATTEMPTS; attempt += 1) {
         let response: Response;
 
         try {
-            response = await fetch(buildArticleRequestUrl(title), {
+            response = await fetch(url, {
                 headers: EXTERNAL_REQUEST_HEADERS,
+                signal: AbortSignal.timeout(EXTERNAL_REQUEST_TIMEOUT_MS),
             });
         } catch {
             throw new GameContentUnavailableError('Could not reach Wikipedia article service');
@@ -144,6 +226,17 @@ async function getWikipediaArticle(title: string): Promise<Response> {
     }
 
     throw new GameContentUnavailableError('Could not reach Wikipedia article service');
+}
+
+function normalizeArticleTitle(title: string): string {
+    return title.trim().toLocaleLowerCase('en-US');
+}
+
+function takeRandomTitle(titles: string[]): string {
+    const randomIndex = Math.floor(Math.random() * titles.length);
+    const [title] = titles.splice(randomIndex, 1);
+
+    return title;
 }
 
 function buildArticleParagraphs(content: string, revealedWords: Set<string>): ArticleParagraph[] {
@@ -171,65 +264,83 @@ function buildArticleParagraphs(content: string, revealedWords: Set<string>): Ar
         );
 }
 
-async function getRandomArticleUrl(category: string): Promise<string> {
-    for (let attempt = 1; attempt <= MAX_RANDOM_ARTICLE_ATTEMPTS; attempt += 1) {
-        let response: Response;
+async function getCategoryArticleTitles(category: string): Promise<string[]> {
+    const response = await getWikipediaResponse(buildCategoryMembersRequestUrl(category));
 
-        try {
-            response = await fetch(buildRandomArticleRequestUrl(category), {
-                redirect: 'manual',
-                headers: EXTERNAL_REQUEST_HEADERS,
-            });
-        } catch {
-            throw new GameContentUnavailableError('Could not reach random article service');
-        }
-
-        if (response.status !== 302) {
-            throw new GameContentUnavailableError(`Unexpected random article response status: ${response.status}`);
-        }
-
-        const articleUrl = response.headers.get('location');
-
-        if (!articleUrl) {
-            throw new GameContentUnavailableError('Random article response did not include a Location header');
-        }
-
-        if (isArticleUrl(articleUrl)) {
-            return articleUrl;
-        }
+    if (!response.ok) {
+        throw new GameContentUnavailableError(
+            `Wikipedia category request failed: ${response.status}`,
+        );
     }
 
-    throw new GameContentUnavailableError(`Could not find an article URL in category "${category}"`);
+    let categoryData: WikipediaCategoryMembersResponse;
+
+    try {
+        categoryData = await response.json() as WikipediaCategoryMembersResponse;
+    } catch {
+        throw new GameContentUnavailableError('Wikipedia category response was not valid JSON');
+    }
+
+    const titles = categoryData.query?.categorymembers?.map((article) => article.title) ?? [];
+
+    if (titles.length === 0) {
+        throw new GameContentUnavailableError(`No articles found in category "${category}"`);
+    }
+
+    return titles;
 }
 
-export async function createGame(userId: number, categoryId?: string) {
+export async function createGame(
+    userId: number,
+    categoryId?: string,
+    requestedDifficulty?: string,
+) {
     const category = categoryId ? getCategory(categoryId) : getRandomCategory();
+    const difficulty = getDifficulty(requestedDifficulty);
+    const activeArticleTitles = new Set(
+        findActiveArticleTitlesByUserId(userId).map(normalizeArticleTitle),
+    );
+    const availableArticleTitles = (await getCategoryArticleTitles(category.wikipediaCategory))
+        .filter((title) => !activeArticleTitles.has(normalizeArticleTitle(title)));
 
-    for (let attempt = 1; attempt <= MAX_SUITABLE_ARTICLE_ATTEMPTS; attempt += 1) {
-        const articleUrl = await getRandomArticleUrl(category.wikipediaCategory);
-        const title = getArticleTitle(articleUrl);
-        const articleResponse = await getWikipediaArticle(title);
+    for (
+        let attempt = 1;
+        attempt <= MAX_SUITABLE_ARTICLE_ATTEMPTS && availableArticleTitles.length > 0;
+        attempt += 1
+    ) {
+        const selectedTitle = takeRandomTitle(availableArticleTitles);
+        const articleResponse = await getWikipediaResponse(
+            buildArticleSummaryRequestUrl(selectedTitle),
+        );
 
         if (!articleResponse.ok) {
-            throw new GameContentUnavailableError(`Wikipedia article request failed: ${articleResponse.status}`);
+            if (articleResponse.status === 404) {
+                continue;
+            }
+
+            throw new GameContentUnavailableError(
+                `Wikipedia article request failed: ${articleResponse.status}`,
+            );
         }
 
-        let articleData: WikipediaGameResponse;
+        let articleData: WikipediaSummaryResponse;
 
         try {
-            articleData = await articleResponse.json() as WikipediaGameResponse;
+            articleData = await articleResponse.json() as WikipediaSummaryResponse;
         } catch {
             throw new GameContentUnavailableError('Wikipedia article response was not valid JSON');
         }
 
-        const articlePage = articleData.query?.pages?.[0];
-        const description = articlePage?.extract?.trim();
+        const title = articleData.title?.trim();
+        const description = articleData.extract?.trim();
+        const articleUrl = articleData.content_urls?.desktop?.page;
 
         if (
-            !articlePage ||
-            articlePage.missing ||
+            articleData.type !== 'standard' ||
+            !title ||
             !description ||
-            !isArticleSizeAllowed(articlePage.length)
+            !articleUrl ||
+            !isArticleLengthAllowed(description)
         ) {
             continue;
         }
@@ -238,14 +349,23 @@ export async function createGame(userId: number, categoryId?: string) {
             userId,
             categoryId: category.id,
             articleUrl,
-            title: articlePage.title,
+            title,
             description,
-            thumbnailUrl: articlePage.thumbnail?.source ?? null
+            thumbnailUrl: articleData.thumbnail?.source ?? null,
+            initialRevealedWords: getInitialRevealedWords(
+                description,
+                title,
+                difficulty,
+            ),
         };
 
         try {
             return createGameInDatabase(gameData);
         } catch (error) {
+            if (error instanceof ActiveArticleConflictError) {
+                continue;
+            }
+
             if (error instanceof GameStorageError) {
                 throw error;
             }
@@ -255,7 +375,7 @@ export async function createGame(userId: number, categoryId?: string) {
     }
 
     throw new GameContentUnavailableError(
-        `Could not find an article between ${MIN_ARTICLE_SIZE_BYTES} and ${MAX_ARTICLE_SIZE_BYTES} bytes`,
+        `Could not find an available article between ${MIN_ARTICLE_WORDS} and ${MAX_ARTICLE_WORDS} words`,
     );
 }
 
@@ -270,6 +390,7 @@ function buildGameDetail(game: GameDetailRow): GameDetail {
         article: {
             id: game.article_id,
             title: game.status === 'won' ? game.article_title : null,
+            titleWordLengths: getTitleWordLengths(game.article_title),
             category: {
                 id: game.category_id,
                 name: game.category_name,
@@ -280,7 +401,6 @@ function buildGameDetail(game: GameDetailRow): GameDetail {
             id: game.user_id,
             username: game.username,
         },
-        currentTitleGuess: game.current_title_guess,
         revealedWordsCount: game.revealed_words_count,
         wordGuessesCount: game.word_guesses_count,
         titleGuessesCount: game.title_guesses_count,
@@ -366,12 +486,6 @@ export function tryWordGuess(gameId: number, userId: number, guessedWord: string
         revealCount,
     );
 
-    const gameAfterGuess = getGameDetail(gameId, userId);
-
-    if (gameAfterGuess.wordGuessesCount % 3 === 0) {
-        revealRandomWord(gameId, userId);
-    }
-
     return {
         game: getGameDetail(gameId, userId),
         correct,
@@ -395,67 +509,10 @@ export function tryTitleGuess(gameId: number, userId: number, guessedTitle: stri
     }
 
     const correct = normalizedGuess === normalizeWord(game.article_title);
-    recordTitleGuess(gameId, userId, guessedTitle.trim(), correct);
+    recordTitleGuess(gameId, userId, correct);
 
     return {
         game: getGameDetail(gameId, userId),
         correct,
     };
-}
-
-function revealRandomWord(gameId: number, userId: number): void {
-    assertActiveGameAccess(gameId, userId);
-
-    const game = findGameDetailById(gameId);
-
-    if (!game) {
-        throw new GameNotFoundError();
-    }
-
-    const revealedWords = new Set(
-        findRevealedWordsByGameId(gameId).map(({ normalized_word }) => normalized_word),
-    );
-    const occurrenceCounts = new Map<string, number>();
-    let selectedWord = '';
-    let selectedNormalizedWord = '';
-    let candidateCount = 0;
-
-    for (const word of game.article_content.split(/\s+/)) {
-        const normalizedWord = normalizeWord(word);
-
-        if (
-            normalizedWord.length === 0
-            || commonWords.has(normalizedWord)
-            || revealedWords.has(normalizedWord)
-        ) {
-            continue;
-        }
-
-        const occurrenceCount = occurrenceCounts.get(normalizedWord);
-
-        if (occurrenceCount !== undefined) {
-            occurrenceCounts.set(normalizedWord, occurrenceCount + 1);
-            continue;
-        }
-
-        occurrenceCounts.set(normalizedWord, 1);
-        candidateCount += 1;
-
-        if (Math.floor(Math.random() * candidateCount) === 0) {
-            selectedWord = word;
-            selectedNormalizedWord = normalizedWord;
-        }
-    }
-
-    if (selectedNormalizedWord.length === 0) {
-        return;
-    }
-
-    recordRevealedWord(
-        gameId,
-        userId,
-        selectedWord,
-        selectedNormalizedWord,
-        occurrenceCounts.get(selectedNormalizedWord) ?? 0,
-    );
 }

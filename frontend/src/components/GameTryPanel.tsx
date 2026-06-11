@@ -10,7 +10,6 @@ import styles from './GameTryPanel.module.css'
 type GameTryPanelProps = {
   status: GameStatus
   playerName: string
-  currentTitleGuess: string | null
   endedAt: string | null
   onGuessWord: (word: string) => Promise<GuessResponse>
   onGuessTitle: (title: string) => Promise<TitleGuessResponse>
@@ -39,7 +38,6 @@ function formatCompletedAt(timestamp: string | null) {
 export function GameTryPanel({
   status,
   playerName,
-  currentTitleGuess,
   endedAt,
   onGuessWord,
   onGuessTitle,
@@ -205,11 +203,6 @@ export function GameTryPanel({
             </p>
           ) : null}
         </form>
-      </div>
-
-      <div className={styles.summaryItem}>
-        <span>Current title guess</span>
-        <strong>{currentTitleGuess ?? 'Not submitted'}</strong>
       </div>
 
       <button

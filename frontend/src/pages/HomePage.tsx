@@ -5,6 +5,10 @@ import { GameCategoryDialog } from '../components/GameCategoryDialog'
 import { NewGameTile } from '../components/NewGameTile'
 import { PageHeader } from '../components/PageHeader'
 import { gameCategories } from '../../../shared/gameCategories'
+import {
+  DEFAULT_GAME_DIFFICULTY,
+  type GameDifficulty,
+} from '../../../shared/gameDifficulties'
 import { getApiErrorMessage } from '../api/client'
 import { createGame } from '../api/games'
 import { useAuth } from '../context/authContext'
@@ -17,6 +21,9 @@ export function HomePage() {
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     gameCategories[0]?.id ?? '',
+  )
+  const [selectedDifficulty, setSelectedDifficulty] = useState<GameDifficulty>(
+    DEFAULT_GAME_DIFFICULTY,
   )
   const [creationType, setCreationType] = useState<
     'quick' | 'category' | null
@@ -52,7 +59,9 @@ export function HomePage() {
     setErrorMessage(null)
 
     try {
-      const response = await createGame()
+      const response = await createGame({
+        difficulty: DEFAULT_GAME_DIFFICULTY,
+      })
       navigate(`/games/${response.game.id}`)
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, 'Could not start game'))
@@ -62,7 +71,10 @@ export function HomePage() {
     }
   }
 
-  async function handleStartCategoryGame(categoryId: string) {
+  async function handleStartCategoryGame(
+    categoryId: string,
+    difficulty: GameDifficulty,
+  ) {
     if (isCreationLocked.current) {
       return
     }
@@ -72,7 +84,10 @@ export function HomePage() {
     setErrorMessage(null)
 
     try {
-      const response = await createGame({ category: categoryId })
+      const response = await createGame({
+        category: categoryId,
+        difficulty,
+      })
       setIsCategoryDialogOpen(false)
       navigate(`/games/${response.game.id}`)
     } catch (error) {
@@ -122,8 +137,10 @@ export function HomePage() {
         <GameCategoryDialog
           categories={gameCategories}
           selectedCategoryId={selectedCategoryId}
+          selectedDifficulty={selectedDifficulty}
           isCreatingGame={isCreatingGame}
           onSelectCategory={setSelectedCategoryId}
+          onSelectDifficulty={setSelectedDifficulty}
           onClose={() => setIsCategoryDialogOpen(false)}
           onStartGame={handleStartCategoryGame}
         />

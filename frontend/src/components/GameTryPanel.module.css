@@ -5,19 +5,19 @@
     linear-gradient(135deg, rgba(255, 215, 108, 0.24), transparent 46%),
     linear-gradient(315deg, rgba(74, 132, 217, 0.12), transparent 44%),
     rgba(255, 255, 255, 0.68);
-  padding: 14px;
+  padding: 12px;
   display: grid;
-  gap: 12px;
+  gap: 9px;
 }
 
 .field {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .guessForm {
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .guessMessage {
@@ -38,7 +38,7 @@
 
 .field input {
   width: 100%;
-  min-height: 44px;
+  min-height: 40px;
   border: 1px solid rgba(74, 132, 217, 0.22);
   border-radius: 8px;
   background: #fff;
@@ -61,7 +61,7 @@
 .secondaryAction,
 .abandonAction {
   width: 100%;
-  min-height: 44px;
+  min-height: 40px;
   border-radius: 8px;
   cursor: pointer;
   font: 900 0.78rem/1 var(--sans);
@@ -128,9 +128,9 @@
   background:
     linear-gradient(135deg, rgba(255, 215, 108, 0.22), transparent 42%),
     rgba(255, 255, 255, 0.84);
-  padding: 14px;
+  padding: 10px 12px;
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .summaryItem strong {

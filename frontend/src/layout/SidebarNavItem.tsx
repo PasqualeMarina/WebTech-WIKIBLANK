@@ -4,26 +4,9 @@ import styles from './SidebarNavItem.module.css'
 type SidebarNavItemProps = {
   label: string
   path: string
-  isEnabled: boolean
 }
 
-export function SidebarNavItem({
-  label,
-  path,
-  isEnabled,
-}: SidebarNavItemProps) {
-  if (!isEnabled) {
-    return (
-      <button
-        type="button"
-        className={[styles.navItem, styles.disabled].join(' ')}
-        aria-disabled="true"
-      >
-        {label}
-      </button>
-    )
-  }
-
+export function SidebarNavItem({ label, path }: SidebarNavItemProps) {
   return (
     <NavLink
       to={path}

@@ -1,7 +1,7 @@
 .appShell {
   min-height: 100svh;
   display: grid;
-  grid-template-columns: 304px minmax(0, 1fr);
+  grid-template-columns: 336px minmax(0, 1fr);
   gap: 0;
   background:
     linear-gradient(135deg, rgba(255, 219, 119, 0.18), transparent 34%),

@@ -6,33 +6,58 @@ export type GameCategory = {
 
 export const gameCategories: GameCategory[] = [
   {
-    id: 'physics',
-    label: 'Physics',
-    wikipediaCategory: 'Physics',
+    id: 'fruits',
+    label: 'Fruits',
+    wikipediaCategory: 'Edible fruits',
   },
   {
-    id: 'history',
-    label: 'History',
-    wikipediaCategory: 'History',
+    id: 'colors',
+    label: 'Colors',
+    wikipediaCategory: 'Web colors',
   },
   {
-    id: 'biology',
-    label: 'Biology',
-    wikipediaCategory: 'Biology',
+    id: 'domestic_animals',
+    label: 'Domesticated Animals',
+    wikipediaCategory: 'Domesticated animals',
   },
   {
-    id: 'cinema',
-    label: 'Cinema',
-    wikipediaCategory: 'Film',
+    id: 'body_parts',
+    label: 'Body Parts',
+    wikipediaCategory: 'Human anatomy',
   },
   {
-    id: 'football',
-    label: 'Football',
-    wikipediaCategory: 'Association football',
+    id: 'vehicles',
+    label: 'Vehicles',
+    wikipediaCategory: 'Vehicles by type',
   },
   {
-    id: 'geography',
-    label: 'Geography',
-    wikipediaCategory: 'Geography',
+    id: 'sports',
+    label: 'Sports',
+    wikipediaCategory: 'Team sports',
+  },
+  {
+    id: 'european_capitals',
+    label: 'European Capitals',
+    wikipediaCategory: 'Capital cities in Europe',
+  },
+  {
+    id: 'natural_features',
+    label: 'Nature Landscapes',
+    wikipediaCategory: 'Landforms',
+  },
+  {
+    id: 'materials',
+    label: 'Materials',
+    wikipediaCategory: 'Materials',
+  },
+  {
+    id: 'football_clubs',
+    label: 'Football Clubs',
+    wikipediaCategory: 'UEFA Champions League winning clubs',
+  },
+  {
+    id: 'top_100_footballers',
+    label: 'Top 100 Footballers Ever',
+    wikipediaCategory: 'FIFA 100',
   },
 ]

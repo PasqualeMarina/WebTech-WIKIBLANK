@@ -1,12 +1,13 @@
 .gamePage {
   min-width: 0;
-  padding: 52px clamp(28px, 6vw, 72px);
+  padding: 32px clamp(20px, 3vw, 40px);
+  box-sizing: border-box;
 }
 
 .gameLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+  gap: 18px;
   align-items: start;
 }
 
@@ -36,25 +37,53 @@
   overflow: hidden;
 }
 
+.articlePanel {
+  align-self: start;
+}
+
 .panelHeading {
-  padding: 20px 24px 18px;
+  padding: 16px 20px;
   border-bottom: 1px solid rgba(74, 132, 217, 0.2);
   background:
     linear-gradient(135deg, rgba(74, 132, 217, 0.16), transparent 46%),
     linear-gradient(315deg, rgba(255, 215, 108, 0.18), transparent 42%),
     rgba(255, 255, 255, 0.72);
+  display: grid;
+  gap: 14px;
+}
+
+.panelMeta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  gap: 16px;
 }
 
-.panelEyebrow {
-  margin: 0 0 6px;
+.categoryBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid rgba(74, 132, 217, 0.2);
+  border-radius: 999px;
+  padding: 7px 13px;
+  background: rgba(255, 255, 255, 0.78);
   color: var(--brand-blue-dark);
-  font-size: 0.74rem;
-  font-weight: 800;
+  font-size: 0.82rem;
+  font-weight: 900;
   letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.titleBlock {
+  display: grid;
+  gap: 10px;
+}
+
+.titleLabel {
+  margin: 0;
+  color: var(--muted-text);
+  font-size: 0.76rem;
+  font-weight: 800;
   text-transform: uppercase;
 }
 
@@ -65,6 +94,25 @@
   font-weight: 850;
   line-height: 1.1;
   letter-spacing: 0;
+}
+
+.hiddenTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.55em;
+}
+
+.hiddenTitleWord {
+  display: inline-flex;
+  gap: 0.1em;
+}
+
+.hiddenTitleLetter {
+  width: 0.48em;
+  height: 0.12em;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 .statusBadge {
@@ -85,16 +133,16 @@
 }
 
 .articleBody {
-  padding: clamp(24px, 4vw, 42px);
+  padding: clamp(20px, 2.5vw, 32px);
   display: grid;
-  gap: 20px;
+  gap: 16px;
 }
 
 .articleBody p {
   margin: 0;
   color: var(--text);
-  font-size: clamp(1rem, 1.3vw, 1.1rem);
-  line-height: 1.9;
+  font-size: clamp(1.05rem, 1.25vw, 1.16rem);
+  line-height: 1.85;
 }
 
 .hiddenWord {
@@ -121,15 +169,50 @@
 }
 
 .sidePanel {
-  padding: 18px;
+  align-self: start;
+  padding: 16px;
   display: grid;
-  gap: 16px;
+  align-content: start;
+  gap: 14px;
+}
+
+.sidePanelHeading {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(74, 132, 217, 0.18);
+}
+
+.sidePanelHeading p {
+  margin: 0 0 5px;
+  color: var(--muted-text);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sidePanelHeading h2 {
+  margin: 0;
+  color: var(--brand-blue-dark);
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.progressPanel {
+  display: grid;
+  gap: 8px;
+}
+
+.progressPanel h3 {
+  margin: 0;
+  color: var(--brand-blue-dark);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .statCard {
@@ -138,7 +221,7 @@
   background:
     linear-gradient(135deg, rgba(255, 215, 108, 0.22), transparent 42%),
     rgba(255, 255, 255, 0.84);
-  padding: 14px;
+  padding: 10px 12px;
 }
 
 .statCard {
@@ -161,7 +244,7 @@
   line-height: 1;
 }
 
-@media (max-width: 1040px) {
+@media (max-width: 1100px) {
   .gameLayout {
     grid-template-columns: 1fr;
   }
@@ -174,9 +257,9 @@
 }
 
 @media (max-width: 560px) {
-  .panelHeading {
-    align-items: start;
-    flex-direction: column;
+  .panelMeta {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .statsGrid {

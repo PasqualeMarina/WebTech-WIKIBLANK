@@ -1,17 +1,33 @@
-export type WikipediaGameResponse = {
+export type WikipediaCategoryMembersResponse = {
     query?: {
-        pages?: Array<{
+        categorymembers?: Array<{
+            pageid: number;
+            ns: number;
             title: string;
-            extract?: string;
-            length?: number;
-            missing?: boolean;
-            thumbnail?: {
-                source: string;
-                width?: number;
-                height?: number;
-            };
         }>;
     };
+};
+
+export type WikipediaSummaryResponse = {
+    type?: string;
+    title?: string;
+    extract?: string;
+    thumbnail?: {
+        source: string;
+        width?: number;
+        height?: number;
+    };
+    content_urls?: {
+        desktop?: {
+            page?: string;
+        };
+    };
+};
+
+export type InitialRevealedWord = {
+    word: string;
+    normalizedWord: string;
+    occurrenceCount: number;
 };
 
 export type GameData = {
@@ -21,6 +37,7 @@ export type GameData = {
     title: string;
     description: string;
     thumbnailUrl: string | null;
+    initialRevealedWords: InitialRevealedWord[];
 };
 
 export type CreatedGame = {
@@ -28,7 +45,6 @@ export type CreatedGame = {
     user_id: number;
     article_id: number;
     status: 'active' | 'won';
-    current_title_guess: string | null;
     revealed_words_count: number;
     word_guesses_count: number;
     title_guesses_count: number;

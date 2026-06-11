@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS games (
   article_id INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'active'
     CHECK (status IN ('active', 'won')),
-  current_title_guess TEXT,
   revealed_words_count INTEGER NOT NULL DEFAULT 0
     CHECK (revealed_words_count >= 0),
   word_guesses_count INTEGER NOT NULL DEFAULT 0

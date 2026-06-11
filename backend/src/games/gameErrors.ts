@@ -6,6 +6,14 @@ export class InvalidGameCategoryError extends Error {
     }
 }
 
+export class InvalidGameDifficultyError extends Error {
+    constructor(difficulty: string) {
+        super(`Invalid game difficulty: ${difficulty}`);
+        this.name = 'InvalidGameDifficultyError';
+        Object.setPrototypeOf(this, InvalidGameDifficultyError.prototype);
+    }
+}
+
 export class GameContentUnavailableError extends Error {
     constructor(message = 'Could not load game content') {
         super(message);
@@ -19,6 +27,14 @@ export class GameStorageError extends Error {
         super(message);
         this.name = 'GameStorageError';
         Object.setPrototypeOf(this, GameStorageError.prototype);
+    }
+}
+
+export class ActiveArticleConflictError extends Error {
+    constructor() {
+        super('User already has an active game with this article');
+        this.name = 'ActiveArticleConflictError';
+        Object.setPrototypeOf(this, ActiveArticleConflictError.prototype);
     }
 }
 

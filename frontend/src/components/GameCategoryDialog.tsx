@@ -1,21 +1,29 @@
 import { useEffect } from 'react'
 import type { GameCategory } from '../../../shared/gameCategories'
+import {
+  gameDifficultyOptions,
+  type GameDifficulty,
+} from '../../../shared/gameDifficulties'
 import styles from './GameCategoryDialog.module.css'
 
 type GameCategoryDialogProps = {
   categories: GameCategory[]
   selectedCategoryId: string
+  selectedDifficulty: GameDifficulty
   isCreatingGame: boolean
   onSelectCategory: (categoryId: string) => void
+  onSelectDifficulty: (difficulty: GameDifficulty) => void
   onClose: () => void
-  onStartGame: (categoryId: string) => void
+  onStartGame: (categoryId: string, difficulty: GameDifficulty) => void
 }
 
 export function GameCategoryDialog({
   categories,
   selectedCategoryId,
+  selectedDifficulty,
   isCreatingGame,
   onSelectCategory,
+  onSelectDifficulty,
   onClose,
   onStartGame,
 }: GameCategoryDialogProps) {
@@ -91,14 +99,56 @@ export function GameCategoryDialog({
           })}
         </div>
 
+        <section
+          className={styles.difficultySection}
+          aria-labelledby="difficulty-title"
+        >
+          <div className={styles.sectionHeading}>
+            <h3 id="difficulty-title">Choose difficulty</h3>
+            <p>Common words are always visible.</p>
+          </div>
+
+          <div className={styles.difficultyGrid}>
+            {gameDifficultyOptions.map((difficulty) => {
+              const isSelected = difficulty.id === selectedDifficulty
+
+              return (
+                <button
+                  key={difficulty.id}
+                  type="button"
+                  className={[
+                    styles.difficultyButton,
+                    isSelected ? styles.selectedDifficulty : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  onClick={() => onSelectDifficulty(difficulty.id)}
+                  aria-pressed={isSelected}
+                >
+                  <strong>{difficulty.label}</strong>
+                  <span>{difficulty.description}</span>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
         <div className={styles.footer}>
           <span className={styles.selection}>
             {selectedCategory ? selectedCategory.label : 'No category selected'}
+            {' · '}
+            {
+              gameDifficultyOptions.find(
+                (difficulty) => difficulty.id === selectedDifficulty,
+              )?.label
+            }
           </span>
           <button
             type="button"
             className={styles.startButton}
-            onClick={() => onStartGame(selectedCategoryId)}
+            onClick={() =>
+              onStartGame(selectedCategoryId, selectedDifficulty)
+            }
             disabled={!selectedCategory || isCreatingGame}
           >
             {isCreatingGame ? 'Starting game...' : 'Start game'}

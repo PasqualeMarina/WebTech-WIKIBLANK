@@ -18,6 +18,7 @@ export type ArticleParagraph = ArticleWord[]
 export type Article = {
   id: number
   title: string | null
+  titleWordLengths: number[]
   category: ArticleCategory
   paragraphs: ArticleParagraph[]
 }

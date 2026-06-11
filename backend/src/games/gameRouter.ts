@@ -1,12 +1,17 @@
 import { Router } from 'express';
 import type { Response } from 'express';
-import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError } from './gameErrors.js';
+import { GameAccessDeniedError, GameContentUnavailableError, GameNotFoundError, GameStorageError, InvalidGameCategoryError, InvalidGameDifficultyError } from './gameErrors.js';
 import { createGame, getActiveGames, getCompletedGames, getGameDetail, getLeaderboard, tryTitleGuess, tryWordGuess } from './gameService.js';
+import { isGameDifficulty } from '../../../shared/gameDifficulties.js';
+import type { GameDifficulty } from '../../../shared/gameDifficulties.js';
 
 export const gameRouter = Router();
 
 function sendCreateGameError(error: unknown, res: Response) {
-    if (error instanceof InvalidGameCategoryError) {
+    if (
+        error instanceof InvalidGameCategoryError
+        || error instanceof InvalidGameDifficultyError
+    ) {
         res.status(400).json({ message: error.message });
         return;
     }
@@ -45,6 +50,20 @@ function getRequestedCategory(body: unknown): string | null | undefined {
     return category.trim();
 }
 
+function getRequestedDifficulty(body: unknown): GameDifficulty | null | undefined {
+    if (typeof body !== 'object' || body === null || !('difficulty' in body)) {
+        return undefined;
+    }
+
+    const difficulty = (body as { difficulty?: unknown }).difficulty;
+
+    if (difficulty === undefined) {
+        return undefined;
+    }
+
+    return isGameDifficulty(difficulty) ? difficulty : null;
+}
+
 function getGuessedWord(body: unknown): string | null {
     if (typeof body !== 'object' || body === null || !('guessedWord' in body)) {
         return null;
@@ -81,14 +100,20 @@ gameRouter.post('/', async (req, res) => {
 
     const userId = req.session.userId;
     const category = getRequestedCategory(req.body);
+    const difficulty = getRequestedDifficulty(req.body);
 
     if (category === null) {
         res.status(400).json({ message: 'Invalid game category' });
         return;
     }
 
+    if (difficulty === null) {
+        res.status(400).json({ message: 'Invalid game difficulty' });
+        return;
+    }
+
     try {
-        const newGame = await createGame(userId, category);
+        const newGame = await createGame(userId, category, difficulty);
         res.status(201).json({ game: newGame });
     } catch (error) {
         sendCreateGameError(error, res);

@@ -1,5 +1,5 @@
 import { db } from '../db/database.js';
-import { GameStorageError } from './gameErrors.js';
+import { ActiveArticleConflictError, GameStorageError } from './gameErrors.js';
 import type { ActiveGameRow, CreatedGame, GameData, GameDetailRow, LeaderboardRow, RevealedWordRow } from './gameTypes.js';
 
 type CategoryRow = {
@@ -7,6 +7,14 @@ type CategoryRow = {
 };
 
 type ArticleRow = {
+    id: number;
+};
+
+type ArticleTitleRow = {
+    title: string;
+};
+
+type GameIdRow = {
     id: number;
 };
 
@@ -22,13 +30,37 @@ const findArticleBySourceUrlStatement = db.prepare<[string], ArticleRow>(`
     WHERE source_url = ?
 `);
 
+const findActiveArticleTitlesByUserIdStatement = db.prepare<[number], ArticleTitleRow>(`
+    SELECT articles.title
+    FROM games
+    JOIN articles ON articles.id = games.article_id
+    WHERE games.user_id = ?
+      AND games.status = 'active'
+`);
+
+const findActiveGameForArticleStatement = db.prepare<{
+    userId: number;
+    sourceUrl: string;
+    title: string;
+}, GameIdRow>(`
+    SELECT games.id
+    FROM games
+    JOIN articles ON articles.id = games.article_id
+    WHERE games.user_id = @userId
+      AND games.status = 'active'
+      AND (
+        articles.source_url = @sourceUrl
+        OR articles.title = @title COLLATE NOCASE
+      )
+    LIMIT 1
+`);
+
 const findGameDetailByIdStatement = db.prepare<[number], GameDetailRow>(`
     SELECT
         games.id,
         games.user_id,
         games.article_id,
         games.status,
-        games.current_title_guess,
         games.revealed_words_count,
         games.word_guesses_count,
         games.title_guesses_count,
@@ -53,7 +85,6 @@ const findCompletedGameDetailsStatement = db.prepare<[], GameDetailRow>(`
         games.user_id,
         games.article_id,
         games.status,
-        games.current_title_guess,
         games.revealed_words_count,
         games.word_guesses_count,
         games.title_guesses_count,
@@ -159,12 +190,10 @@ const incrementRevealedWordsStatement = db.prepare<[number, number, number]>(`
 const recordTitleGuessStatement = db.prepare<{
     gameId: number;
     userId: number;
-    guessedTitle: string;
     correct: number;
 }>(`
     UPDATE games
-    SET current_title_guess = @guessedTitle,
-        title_guesses_count = title_guesses_count + 1,
+    SET title_guesses_count = title_guesses_count + 1,
         status = CASE WHEN @correct = 1 THEN 'won' ELSE status END,
         ended_at = CASE WHEN @correct = 1 THEN CURRENT_TIMESTAMP ELSE ended_at END,
         elapsed_seconds = CASE
@@ -215,7 +244,6 @@ const createGameStatement = db.prepare<{
         user_id,
         article_id,
         status,
-        current_title_guess,
         revealed_words_count,
         word_guesses_count,
         title_guesses_count,
@@ -229,6 +257,16 @@ const createGameTransaction = db.transaction((gameData: GameData): CreatedGame =
 
     if (!category) {
         throw new GameStorageError(`Category "${gameData.categoryId}" not found in database`);
+    }
+
+    const activeGame = findActiveGameForArticleStatement.get({
+        userId: gameData.userId,
+        sourceUrl: gameData.articleUrl,
+        title: gameData.title,
+    });
+
+    if (activeGame) {
+        throw new ActiveArticleConflictError();
     }
 
     const existingArticle = findArticleBySourceUrlStatement.get(gameData.articleUrl);
@@ -265,11 +303,27 @@ const createGameTransaction = db.transaction((gameData: GameData): CreatedGame =
         throw new GameStorageError('Failed to create game');
     }
 
+    for (const revealedWord of gameData.initialRevealedWords) {
+        insertRevealedWord(
+            game.id,
+            gameData.userId,
+            revealedWord.word,
+            revealedWord.normalizedWord,
+            revealedWord.occurrenceCount,
+        );
+    }
+
     return game;
 });
 
 export function createGameInDatabase(gameData: GameData): CreatedGame {
     return createGameTransaction(gameData);
+}
+
+export function findActiveArticleTitlesByUserId(userId: number): string[] {
+    return findActiveArticleTitlesByUserIdStatement
+        .all(userId)
+        .map((article) => article.title);
 }
 
 export function findGameDetailById(gameId: number): GameDetailRow | null {
@@ -299,13 +353,11 @@ export function hasActiveGameAccess(gameId: number, userId: number): boolean {
 export function recordTitleGuess(
     gameId: number,
     userId: number,
-    guessedTitle: string,
     correct: boolean,
 ): void {
     const result = recordTitleGuessStatement.run({
         gameId,
         userId,
-        guessedTitle,
         correct: correct ? 1 : 0,
     });
 
@@ -371,22 +423,4 @@ export function recordWordGuess(
     occurrenceCount: number,
 ): number {
     return recordWordGuessTransaction(gameId, userId, word, normalizedWord, occurrenceCount);
-}
-
-const recordRevealedWordTransaction = db.transaction(insertRevealedWord);
-
-export function recordRevealedWord(
-    gameId: number,
-    userId: number,
-    word: string,
-    normalizedWord: string,
-    occurrenceCount: number,
-): number {
-    return recordRevealedWordTransaction(
-        gameId,
-        userId,
-        word,
-        normalizedWord,
-        occurrenceCount,
-    );
 }

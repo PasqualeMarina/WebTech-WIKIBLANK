@@ -9,7 +9,7 @@
 }
 
 .dialog {
-  width: min(100%, 560px);
+  width: min(100%, 700px);
   max-height: min(720px, calc(100vh - 44px));
   overflow: auto;
   border: 1px solid rgba(74, 132, 217, 0.2);
@@ -120,6 +120,60 @@
     linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
 }
 
+.difficultySection {
+  display: grid;
+  gap: 12px;
+}
+
+.sectionHeading h3 {
+  margin: 0;
+  color: var(--brand-blue-dark);
+  font-size: 1rem;
+}
+
+.sectionHeading p {
+  margin: 4px 0 0;
+  color: var(--muted-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.difficultyGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.difficultyButton {
+  min-height: 82px;
+  border: 1px solid rgba(74, 132, 217, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+  color: var(--brand-blue-dark);
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+}
+
+.difficultyButton strong {
+  font-size: 0.92rem;
+}
+
+.difficultyButton span {
+  color: var(--muted-text);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.selectedDifficulty {
+  border-color: rgba(27, 76, 148, 0.4);
+  background: rgba(74, 132, 217, 0.1);
+  box-shadow: inset 0 0 0 2px rgba(74, 132, 217, 0.18);
+}
+
 .footer {
   display: flex;
   align-items: center;
@@ -172,6 +226,7 @@
 
 .closeButton:focus-visible,
 .categoryButton:focus-visible,
+.difficultyButton:focus-visible,
 .startButton:focus-visible {
   outline: 3px solid rgba(255, 210, 94, 0.85);
   outline-offset: 3px;
@@ -183,6 +238,10 @@
   }
 
   .categoryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .difficultyGrid {
     grid-template-columns: 1fr;
   }
 
