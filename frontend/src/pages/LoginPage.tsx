@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom'
 import { getApiErrorMessage } from '../api/client'
 import {
   MIN_PASSWORD_LENGTH,
@@ -24,12 +29,26 @@ function getSafeRedirectPath(redirectPath: string | null): string {
   return '/home'
 }
 
+function getRegisteredUsername(state: unknown): string {
+  if (
+    typeof state === 'object'
+    && state !== null
+    && 'username' in state
+    && typeof state.username === 'string'
+  ) {
+    return state.username
+  }
+
+  return ''
+}
+
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const { login } = useAuth()
-  const [username, setUsername] = useState(
-    () => searchParams.get('username') ?? '',
+  const [username, setUsername] = useState(() =>
+    getRegisteredUsername(location.state),
   )
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(() =>

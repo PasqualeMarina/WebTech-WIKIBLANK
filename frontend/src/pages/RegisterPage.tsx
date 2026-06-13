@@ -46,7 +46,9 @@ export function RegisterPage() {
 
     try {
       await registerUser({ username: trimmedUsername, password })
-      navigate(`/login?username=${encodeURIComponent(trimmedUsername)}`)
+      navigate('/login', {
+        state: { username: trimmedUsername },
+      })
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, 'Registration failed'))
     } finally {
