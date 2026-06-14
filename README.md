@@ -1,57 +1,146 @@
-# WebTech-WIKIBLANK
+# WIKIBLANK
 
-WIKIBLANK: An interactive web platform where users guess the title of encyclopedic articles by uncovering hidden words. Web Technologies course project.
+WIKIBLANK is an interactive web app inspired by the hangman game. The player
+must guess the title of a Wikipedia article by revealing hidden words in
+the text.
 
-## Project Assignment
+This project was created for the Web Technologies course.
 
-Si vuole realizzare WIKIBLANK, una piattaforma web ispirata al gioco dell'impiccato e basata su articoli enciclopedici. Per ogni partita, il sistema seleziona casualmente un articolo da un insieme di pagine ottenute tramite API esterne e ne mostra il contenuto testuale con le parole oscurate.
+## Main features
 
-Gli utenti registrati potranno avviare una nuova partita e provare a scoprire l'articolo inserendo parole come tentativi: ogni parola indovinata correttamente verra rivelata in tutte le sue occorrenze nel testo. In qualsiasi momento, il giocatore potra provare a indovinare il titolo dell'articolo; la partita termina quando il titolo viene individuato correttamente oppure quando il giocatore decide di abbandonare.
+- user registration, login, and logout;
+- quick games and category-based games;
+- guesses for single words and for the article title;
+- saved game progress, so games can be continued later;
+- lists of active and completed games;
+- user leaderboard;
+- public access to completed games and leaderboard.
 
-Lo stato di ogni partita deve essere salvato in maniera persistente lato server, cosi da consentire a un giocatore di riprendere la partita su un dispositivo diverso da quello su cui la partita e' iniziata.
+## Running the application
 
-Tutti gli utenti, anche quelli non registrati, potranno consultare una raccolta delle partite concluse e visualizzarne i dettagli, come il testo parzialmente scoperto, il titolo corretto, il numero di tentativi effettuati e il tempo impiegato. Gli utenti autenticati, invece, potranno giocare nuove partite e comparire in una classifica basata sul tempo medio necessario a indovinare il titolo e sul numero di partite completate con successo.
+### Requirements
 
-Per rendere le partite piu interessanti, si suggerisce di scegliere pagine non troppo brevi ne troppo lunghe, e che abbiano titoli non troppo lunghi. Inoltre, e' possibile anche scegliere la pagina iniziale casualmente da un pool piu ristretto di pagine, ad esempio pagine di calciatori famosi, squadre di calcio, animali o personaggi storici.
+- Node.js;
+- npm.
 
-## Chosen Technology Stack
+### Installation
 
-Frontend:
+From the project root, install the dependencies:
 
-- React
-- Vite
-- TypeScript
-- CSS Modules or component-based CSS
+```bash
+npm install
+npm --prefix backend install
+npm --prefix frontend install
+```
 
-Backend:
+Create `backend/.env` from `backend/.env.example` and set at least a JWT
+secret:
 
-- Node.js
-- Express
-- TypeScript
+```env
+JWT_SECRET=replace-with-a-long-random-secret
+CLIENT_ORIGIN=http://localhost:5173
+NODE_ENV=development
+DATABASE_PATH=./data/wikblank.sqlite
+```
+You can generate a random secret by running this command in a terminal: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
-Database:
+### Development mode
 
-- SQLite
+Start the backend and frontend together:
 
-Authentication:
+```bash
+npm run dev
+```
 
-- cookie-based sessions
-- passwords hashed with bcrypt
+The application will be available at:
 
-Supporting libraries:
+- frontend: `http://localhost:5173`;
+- backend API: `http://localhost:3001/api`.
 
-- better-sqlite3 or sqlite for database access
-- express-session for session management
-- bcrypt for password hashing
-- zod for API input validation
-- Vitest for optional automated tests
+You can also start the two processes separately with `npm run dev:backend`
+and `npm run dev:frontend`.
 
-## Why This Stack
+### Build and start
 
-The combination of React, Vite and TypeScript makes it possible to build an interactive and maintainable interface for managing games, hidden words, guesses and scores.
+Build and start the backend:
 
-Node.js with Express provides a backend that is simple to understand and extend, suitable for creating the APIs required for users, articles, games and match history.
+```bash
+npm --prefix backend run build
+npm --prefix backend run start
+```
 
-SQLite is a lightweight choice that fits a university project well, because it stores data in a single file and does not require a separate database server.
+In another terminal, build and serve the frontend:
 
-Cookie-based sessions are a clear solution for a traditional web application with login, while bcrypt allows passwords to be stored securely.
+```bash
+npm --prefix frontend run build
+npm --prefix frontend run preview
+```
+
+When `NODE_ENV=production`, the backend requires `JWT_SECRET` and marks the
+authentication cookie as secure. In a real production environment, the
+application must therefore be served through HTTPS. When testing locally,
+browsers may still accept secure cookies over HTTP on `localhost`, because
+they treat it as a trusted local address. This behavior should not be expected
+for other HTTP domains or network addresses.
+
+## Technologies
+
+### Frontend
+
+- React 19;
+- TypeScript;
+- Vite 8;
+- React Router;
+- Axios;
+- CSS Modules.
+
+### Backend
+
+- Node.js;
+- Express 5;
+- TypeScript;
+- SQLite with `better-sqlite3`;
+- `tsx` for development.
+
+### Authentication and security
+
+- JSON Web Tokens with `jsonwebtoken`;
+- HTTP-only cookies for storing the token;
+- bcrypt for password hashing;
+- CORS and `cookie-parser`;
+- dotenv for environment variables.
+
+### Testing and code quality
+
+- Playwright for end-to-end tests;
+- ESLint;
+- a separate SQLite database and fixed data for E2E tests;
+- `concurrently` to start the frontend and backend together.
+
+## End-to-end tests
+
+Playwright automatically starts the frontend and backend with a separate E2E
+database. Run the tests from the project root:
+
+```bash
+npx playwright test
+```
+
+Open the generated HTML report with:
+
+```bash
+npx playwright show-report
+```
+
+## Project description
+
+For each game, the system selects an encyclopedia article and shows its text
+with hidden words. When the player guesses a word, all matches of that word
+are revealed.
+
+The player can try to guess the article title at any time. The game ends when
+the correct title is found or when the player chooses to leave the game.
+
+Game progress is saved on the server. This allows signed-in users to stop a
+game and continue it later. Guests can browse leaderboard and view completed
+games.
