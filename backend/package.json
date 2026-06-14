@@ -2,8 +2,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "db:e2e:reset": "node scripts/reset-e2e-database.js",
+    "db:e2e:reset": "node scripts/e2e/reset-e2e-database.js",
     "dev:e2e": "npm run db:e2e:reset && cross-env DATABASE_PATH=./data/wikblank.e2e.sqlite tsx watch src/server.ts",
+    "start:e2e": "npm run db:e2e:reset && cross-env DATABASE_PATH=./data/wikblank.e2e.sqlite tsx src/server.ts",
     "build": "node scripts/build.js",
     "lint": "eslint .",
     "start": "node dist/backend/src/server.js"

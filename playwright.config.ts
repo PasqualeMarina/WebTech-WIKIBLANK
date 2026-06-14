@@ -73,7 +73,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: 'npm --prefix backend run dev:e2e',
+      command: 'npm --prefix backend run start:e2e',
       url: 'http://localhost:3001/api/games/leaderboard',
       reuseExistingServer: false,
     },
